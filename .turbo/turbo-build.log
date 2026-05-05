@@ -1,0 +1,32 @@
+
+> @hackersdeal/web@0.0.0 build
+> next build
+
+   ▲ Next.js 15.5.15
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.1s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      166 B         106 kB
+├ ○ /_not-found                            986 B         103 kB
+├ ○ /dashboard                             122 B         102 kB
+├ ○ /login                                 166 B         106 kB
+└ ○ /signup                                166 B         106 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/18-2d765459f0cd2fba.js          46 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+○  (Static)  prerendered as static content
+
