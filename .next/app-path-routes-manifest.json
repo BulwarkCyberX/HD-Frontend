@@ -1,0 +1,21 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/auth/login/page": "/auth/login",
+  "/auth/signup/page": "/auth/signup",
+  "/login/page": "/login",
+  "/projects/[id]/bid/page": "/projects/[id]/bid",
+  "/page": "/",
+  "/projects/page": "/projects",
+  "/projects/[id]/page": "/projects/[id]",
+  "/vdp/[id]/page": "/vdp/[id]",
+  "/signup/page": "/signup",
+  "/dashboard/admin/reports/page": "/dashboard/admin/reports",
+  "/dashboard/bounty/[id]/page": "/dashboard/bounty/[id]",
+  "/dashboard/bounty/page": "/dashboard/bounty",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/bids/page": "/dashboard/bids",
+  "/dashboard/projects/create/page": "/dashboard/projects/create",
+  "/dashboard/profile/page": "/dashboard/profile",
+  "/dashboard/projects/[id]/page": "/dashboard/projects/[id]",
+  "/dashboard/vdp/page": "/dashboard/vdp"
+}

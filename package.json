@@ -9,8 +9,7 @@
     "lint": "eslint . --max-warnings 0"
   },
   "dependencies": {
-    "@hackersdeal/types": "*",
-    "@hackersdeal/ui": "*",
+    "@hackersdeal/ui": "file:./local-ui",
     "@hookform/resolvers": "^5.2.2",
     "next": "^15.3.1",
     "react": "^19.1.0",
@@ -21,7 +20,6 @@
   "devDependencies": {
     "@eslint/compat": "^1.2.7",
     "@eslint/eslintrc": "^3.3.1",
-    "@hackersdeal/config": "*",
     "@types/node": "^22.15.3",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { DashboardSidebar } from '@/components/dashboard-sidebar';
 import { ProtectedRoute } from '@/components/protected-route';
 import { ProjectCard } from '@/components/project-card';
@@ -12,11 +11,11 @@ import { getProjects, type ProjectItem } from '@/lib/api/projects';
 import { useAuth } from '@/hooks/auth-context';
 
 export default function ProjectsPage() {
-  const searchParams = useSearchParams();
   const { token, logout, user } = useAuth();
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showCreatedMessage, setShowCreatedMessage] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -42,6 +41,12 @@ export default function ProjectsPage() {
     };
     void run();
   }, [logout, token]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    setShowCreatedMessage(params.get('created') === '1');
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -69,7 +74,7 @@ export default function ProjectsPage() {
                   ) : null}
                 </div>
               </div>
-              {searchParams.get('created') === '1' ? (
+              {showCreatedMessage ? (
                 <p className="text-sm text-emerald-700">Project created successfully.</p>
               ) : null}
               {loading ? <p className="text-sm text-slate-600">Loading projects...</p> : null}
