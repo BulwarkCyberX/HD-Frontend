@@ -14,9 +14,9 @@ export function ProjectCard({
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-neutral-50">{project.title}</h3>
-          <p className="mt-2 text-sm text-neutral-300">{project.description}</p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs text-neutral-400">
+          <h3 className="text-base font-semibold text-slate-900">{project.title}</h3>
+          <p className="mt-2 text-sm text-slate-600">{project.description}</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
             <span>Cost: {budgetLabel}</span>
             <span>|</span>
             <span>

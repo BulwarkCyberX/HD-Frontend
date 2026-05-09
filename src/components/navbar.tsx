@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { NavUserMenu } from '@/components/nav-user-menu';
 import { NotificationBell } from '@/components/notification-bell';
 import { useAuth } from '@/hooks/auth-context';
 
 export function Navbar() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const links = isAuthenticated
     ? [
@@ -40,18 +41,7 @@ export function Navbar() {
           {isLoading ? (
             <div className="ml-1 h-8 w-24 animate-pulse rounded-md bg-neutral-900" aria-label="Loading session" />
           ) : isAuthenticated ? (
-            <div className="ml-1 flex items-center gap-2">
-              <span className="hidden max-w-[14rem] truncate text-sm text-neutral-300 sm:inline">
-                {user?.email ?? 'Signed in'}
-              </span>
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-neutral-300 transition hover:bg-neutral-900 hover:text-tropical-sand-200"
-              >
-                Logout
-              </button>
-            </div>
+            <NavUserMenu />
           ) : null}
         </div>
       </div>

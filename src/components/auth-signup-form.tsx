@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Card, Input } from '@hackersdeal/ui';
-import { ApiError, checkEmailAvailability, register as registerApi } from '@/lib/api/auth';
+import { ApiError, checkEmailAvailability, register as registerApi, type AuthResponse } from '@/lib/api/auth';
 import { useAuth } from '@/hooks/auth-context';
 
 const countries = [
@@ -145,7 +145,11 @@ export function AuthSignupForm() {
         password: values.password,
         role: 'CLIENT',
       });
-      setSession(result);
+      if ('needsEmailVerification' in result) {
+        router.push(`/auth/check-inbox?email=${encodeURIComponent(result.email)}`);
+        return;
+      }
+      setSession(result as AuthResponse);
       setServerMessage('Registration successful');
       router.push('/dashboard');
     } catch (error) {
@@ -158,7 +162,7 @@ export function AuthSignupForm() {
   };
 
   return (
-    <Card className="w-full max-w-md hd-fade-up">
+    <Card surface="dark" className="w-full max-w-md hd-fade-up">
       <h1 className="text-2xl font-semibold tracking-tight text-neutral-50">Create an account</h1>
       <p className="mt-2 text-sm text-neutral-300">Sign up with your details and a strong password.</p>
 
@@ -192,6 +196,16 @@ export function AuthSignupForm() {
             <p className="text-xs text-rose-400">{emailStatus.message}</p>
           ) : emailStatus.state === 'ok' ? (
             <p className="text-xs text-emerald-300">Email available</p>
+          ) : null}
+          {emailStatus.state === 'ok' ? (
+            <div className="mt-3 overflow-hidden rounded-lg border border-emerald-500/25 bg-emerald-500/5 px-3 py-3 transition-opacity duration-300">
+              <p className="text-xs font-medium text-emerald-200">Email verification</p>
+              <p className="mt-1 text-xs leading-relaxed text-neutral-300">
+                After you create your account, we will send a <strong className="text-neutral-100">6-digit code</strong>{' '}
+                and a secure link to this address. The link stays valid for <strong className="text-neutral-100">24 hours</strong>.
+                You will enter the code on the next screen to confirm it is really yours.
+              </p>
+            </div>
           ) : null}
         </div>
 
@@ -290,7 +304,11 @@ export function AuthSignupForm() {
           ) : null}
         </div>
 
-        <Button className="w-full" type="submit" disabled={isSubmitting || emailStatus.state === 'checking'}>
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={isSubmitting || emailStatus.state === 'checking' || emailStatus.state === 'taken'}
+        >
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
       </form>

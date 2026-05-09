@@ -66,8 +66,8 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-5xl px-4 py-8 sm:px-6">
-      {loading ? <p className="text-sm text-neutral-300">Loading project...</p> : null}
+    <div className="mx-auto w-full max-w-5xl px-1 py-2 sm:px-2 sm:py-4">
+      {loading ? <p className="text-sm text-slate-600">Loading project...</p> : null}
       {errorMessage ? <p className="mb-4 text-sm text-rose-400">{errorMessage}</p> : null}
 
       {project ? (
@@ -75,37 +75,37 @@ export default function ProjectDetailPage() {
           <Card className="hd-fade-up">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h1 className="text-2xl font-semibold text-neutral-50">{project.title}</h1>
-                <p className="mt-2 text-sm text-neutral-300">{project.description}</p>
+                <h1 className="text-2xl font-semibold text-slate-900">{project.title}</h1>
+                <p className="mt-2 text-sm text-slate-600">{project.description}</p>
               </div>
               <Badge tone={project.status === 'COMPLETED' || project.status === 'ACTIVE' ? 'success' : 'warning'}>
                 {project.status}
               </Badge>
             </div>
-            <div className="mt-4 grid gap-2 text-sm text-neutral-300 sm:grid-cols-2">
+            <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
               <p>
-                <span className="font-medium text-neutral-50">Cost:</span>{' '}
+                <span className="font-medium text-slate-900">Cost:</span>{' '}
                 {project.budgetType === 'HOURLY' ? `₹${project.budgetAmount}/hr` : `₹${project.budgetAmount}`}{' '}
-                <span className="text-neutral-500">({project.budgetType})</span>
+                <span className="text-slate-500">({project.budgetType})</span>
               </p>
               <p>
-                <span className="font-medium text-neutral-50">Timeline:</span> {project.timeline}
+                <span className="font-medium text-slate-900">Timeline:</span> {project.timeline}
               </p>
               <p>
-                <span className="font-medium text-neutral-50">Testing Window:</span> {project.testingWindow}
+                <span className="font-medium text-slate-900">Testing Window:</span> {project.testingWindow}
               </p>
               <p>
-                <span className="font-medium text-neutral-50">Visibility:</span> {project.visibility}
+                <span className="font-medium text-slate-900">Visibility:</span> {project.visibility}
               </p>
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-4">
-              <Link href="/projects" className="text-sm font-medium text-emerald-300 hover:text-emerald-200">
+              <Link href="/projects" className="text-sm font-medium text-tropical-jade-700 hover:text-tropical-jade-600">
                 Back to projects
               </Link>
               {canAccessWorkspace ? (
                 <Link
                   href={`/dashboard/projects/${project.id}`}
-                  className="text-sm font-medium text-neutral-200 hover:text-neutral-50"
+                  className="text-sm font-medium text-slate-800 hover:text-slate-950"
                 >
                   Open workspace
                 </Link>
@@ -123,8 +123,8 @@ export default function ProjectDetailPage() {
               )}
             </div>
             {selectedProviderProfile?.providerProfile ? (
-              <div className="mt-4 rounded-md border border-neutral-800 bg-neutral-950/40 p-3 text-xs text-neutral-300">
-                <p className="mb-1 font-medium text-neutral-50">Selected Provider Reputation</p>
+              <div className="mt-4 rounded-md border border-tropical-jade-200 bg-tropical-sage-100/80 p-3 text-xs text-slate-700">
+                <p className="mb-1 font-medium text-slate-900">Selected Provider Reputation</p>
                 <p>
                   Rating: {selectedProviderProfile.providerProfile.rating.toFixed(1)} | Reviews:{' '}
                   {selectedProviderProfile.providerProfile.totalReviews} | Completed:{' '}
@@ -140,23 +140,23 @@ export default function ProjectDetailPage() {
 
           {token && user?.role === 'CLIENT' ? (
             <section className="space-y-4 hd-fade-in">
-              <h2 className="text-xl font-semibold text-neutral-50">Bids</h2>
+              <h2 className="text-xl font-semibold text-slate-900">Bids</h2>
               {bids.length === 0 ? (
-                <p className="text-sm text-neutral-300">No bids submitted yet.</p>
+                <p className="text-sm text-slate-600">No bids submitted yet.</p>
               ) : (
                 bids.map((bid) => (
                   <Card key={bid.id}>
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-medium text-neutral-50">
+                        <p className="text-sm font-medium text-slate-900">
                           Provider: {bid.provider?.email ?? bid.providerId}
                         </p>
-                        <p className="mt-2 text-sm text-neutral-300">{bid.proposal}</p>
-                        <p className="mt-2 text-xs text-neutral-500">
+                        <p className="mt-2 text-sm text-slate-600">{bid.proposal}</p>
+                        <p className="mt-2 text-xs text-slate-500">
                           Price: {bid.price} | Timeline: {bid.timeline}
                         </p>
                         {bid.provider?.providerProfile ? (
-                          <p className="mt-1 text-xs text-neutral-500">
+                          <p className="mt-1 text-xs text-slate-500">
                             Rating: {bid.provider.providerProfile.rating.toFixed(1)} | Reviews:{' '}
                             {bid.provider.providerProfile.totalReviews} | Completed:{' '}
                             {bid.provider.providerProfile.completedProjects} | Valid reports:{' '}
@@ -189,6 +189,6 @@ export default function ProjectDetailPage() {
           ) : null}
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

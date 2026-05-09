@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { FileAttachmentControl } from '@/components/file-attachment-control';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
@@ -101,7 +101,7 @@ export default function BountyProgramPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <Link href="/dashboard/bounty" className="text-sm text-emerald-700 hover:underline">
+        <Link href="/dashboard/bounty" className="text-sm text-tropical-jade-800 hover:underline">
           ← Back to bounty programs
         </Link>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900">{program.title}</h1>
@@ -127,15 +127,8 @@ export default function BountyProgramPage() {
         <Card className="space-y-3">
           <h2 className="font-semibold text-slate-900">Submit vulnerability</h2>
           <form className="space-y-2" onSubmit={onSubmitReport}>
-            <input
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-            <textarea
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <Textarea
               rows={5}
               placeholder="Description and reproduction"
               value={description}
@@ -143,7 +136,7 @@ export default function BountyProgramPage() {
               required
             />
             <select
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm text-slate-900"
               value={severity}
               onChange={(e) => setSeverity(e.target.value)}
             >

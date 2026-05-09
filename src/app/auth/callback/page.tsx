@@ -41,7 +41,7 @@ function AuthCallbackInner() {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center px-4 py-12 sm:px-6">
-      <Card className="w-full max-w-md hd-fade-up">
+      <Card surface="dark" className="w-full max-w-md hd-fade-up">
         <h1 className="text-xl font-semibold text-neutral-50">Signing you in</h1>
         {message ? <p className="mt-2 text-sm text-neutral-300">{message}</p> : null}
         {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}
@@ -55,7 +55,7 @@ export default function AuthCallbackPage() {
     <Suspense
       fallback={
         <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center px-4 py-12 sm:px-6">
-          <Card className="w-full max-w-md hd-fade-up">
+          <Card surface="dark" className="w-full max-w-md hd-fade-up">
             <h1 className="text-xl font-semibold text-neutral-50">Signing you in</h1>
             <p className="mt-2 text-sm text-neutral-300">Loading callback…</p>
           </Card>

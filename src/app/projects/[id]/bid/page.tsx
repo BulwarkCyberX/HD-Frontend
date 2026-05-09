@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Card, Input } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
@@ -74,7 +74,7 @@ export default function SubmitBidPage() {
 
   return (
     <ProtectedRoute>
-      <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-3xl px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-3xl px-1 py-2 sm:px-2 sm:py-4">
         <Card className="space-y-5">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Submit Bid</h1>
@@ -88,12 +88,7 @@ export default function SubmitBidPage() {
               <label htmlFor="proposal" className="text-sm font-medium text-slate-700">
                 Proposal
               </label>
-              <textarea
-                id="proposal"
-                rows={6}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-emerald-500"
-                {...register('proposal')}
-              />
+              <Textarea id="proposal" rows={6} className="focus:border-tropical-aqua-500" {...register('proposal')} />
               {errors.proposal ? (
                 <p className="text-xs text-rose-600">{errors.proposal.message}</p>
               ) : null}
@@ -159,7 +154,7 @@ export default function SubmitBidPage() {
             </div>
           </form>
         </Card>
-      </main>
+      </div>
     </ProtectedRoute>
   );
 }

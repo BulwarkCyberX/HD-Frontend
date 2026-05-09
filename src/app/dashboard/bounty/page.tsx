@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Input } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { createBountyProgram, listBountyPrograms, type BountyProgram } from '@/lib/api/bounty';
@@ -88,7 +88,7 @@ export default function BountyDashboardPage() {
             <ul className="divide-y divide-slate-100">
               {programs.map((p) => (
                 <li key={p.id} className="py-2">
-                  <Link href={`/dashboard/bounty/${p.id}`} className="font-medium text-emerald-800 hover:underline">
+                  <Link href={`/dashboard/bounty/${p.id}`} className="font-medium text-tropical-jade-800 hover:underline">
                     {p.title}
                   </Link>
                   <span className="ml-2 text-xs text-slate-500">{p.status}</span>
@@ -119,17 +119,12 @@ export default function BountyDashboardPage() {
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">Description</label>
-            <textarea
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">Scope (JSON)</label>
-            <textarea
-              className="font-mono w-full rounded-md border border-slate-300 px-3 py-2 text-xs"
+            <Textarea
+              className="font-mono text-xs"
               rows={5}
               value={scopeJson}
               onChange={(e) => setScopeJson(e.target.value)}
@@ -137,8 +132,8 @@ export default function BountyDashboardPage() {
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">Reward table (JSON)</label>
-            <textarea
-              className="font-mono w-full rounded-md border border-slate-300 px-3 py-2 text-xs"
+            <Textarea
+              className="font-mono text-xs"
               rows={4}
               value={rewardJson}
               onChange={(e) => setRewardJson(e.target.value)}
@@ -155,7 +150,7 @@ export default function BountyDashboardPage() {
           <div className="flex items-center gap-2">
             <label className="text-sm text-slate-700">Initial status</label>
             <select
-              className="rounded-md border border-slate-300 px-2 py-1 text-sm"
+              className="rounded-md border border-tropical-jade-200 bg-white px-2 py-1 text-sm text-slate-900"
               value={status}
               onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'ACTIVE')}
             >
@@ -179,7 +174,7 @@ export default function BountyDashboardPage() {
             {programs.map((p) => (
               <li key={p.id} className="flex items-center justify-between py-2">
                 <div>
-                  <Link href={`/dashboard/bounty/${p.id}`} className="font-medium text-emerald-800 hover:underline">
+                  <Link href={`/dashboard/bounty/${p.id}`} className="font-medium text-tropical-jade-800 hover:underline">
                     {p.title}
                   </Link>
                   <p className="text-xs text-slate-500">{p.status}</p>

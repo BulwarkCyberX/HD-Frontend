@@ -43,15 +43,15 @@ export default function HomePage() {
       </section>
 
       <section className="grid gap-4 sm:grid-cols-3 hd-fade-in">
-        <Card className="border-tropical-aqua-500/20">
+        <Card surface="dark" className="border-tropical-aqua-500/20">
           <h2 className="text-base font-semibold text-neutral-50">Auth that feels instant</h2>
           <p className="mt-2 text-sm text-neutral-300">Password or one-time code, plus SSO providers.</p>
         </Card>
-        <Card className="border-tropical-sage-500/20">
+        <Card surface="dark" className="border-tropical-sage-500/20">
           <h2 className="text-base font-semibold text-neutral-50">Protected workspace</h2>
           <p className="mt-2 text-sm text-neutral-300">Sessions and guards that stay consistent across pages.</p>
         </Card>
-        <Card className="border-tropical-sunrise-500/20">
+        <Card surface="dark" className="border-tropical-sunrise-500/20">
           <h2 className="text-base font-semibold text-neutral-50">Project flow built-in</h2>
           <p className="mt-2 text-sm text-neutral-300">Post, bid, chat, deliver, and review — end-to-end.</p>
         </Card>

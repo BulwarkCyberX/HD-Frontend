@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Card, Input } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { createVdp } from '@/lib/api/vdp';
@@ -66,23 +66,11 @@ export default function VdpManagePage() {
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">Scope (JSON)</label>
-            <textarea
-              className="font-mono w-full rounded-md border border-slate-300 px-3 py-2 text-xs"
-              rows={6}
-              value={scopeJson}
-              onChange={(e) => setScopeJson(e.target.value)}
-            />
+            <Textarea className="font-mono text-xs" rows={6} value={scopeJson} onChange={(e) => setScopeJson(e.target.value)} />
           </div>
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">Disclosure policy</label>
-            <textarea
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              rows={8}
-              value={policy}
-              onChange={(e) => setPolicy(e.target.value)}
-              required
-              minLength={20}
-            />
+            <Textarea rows={8} value={policy} onChange={(e) => setPolicy(e.target.value)} required minLength={20} />
           </div>
           {error ? <p className="text-sm text-rose-600">{error}</p> : null}
           <Button type="submit" disabled={busy}>

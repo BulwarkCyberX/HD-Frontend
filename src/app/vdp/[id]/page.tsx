@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button, Card, Input } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { uploadVdpAttachmentPublic } from '@/lib/api/files';
@@ -113,14 +113,7 @@ export default function PublicVdpPage() {
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Description</label>
-              <textarea
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                rows={8}
-                required
-                minLength={10}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
+              <Textarea rows={8} required minLength={10} value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Contact email (recommended)</label>
@@ -134,7 +127,7 @@ export default function PublicVdpPage() {
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Severity (optional)</label>
               <select
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm text-slate-900"
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value)}
               >

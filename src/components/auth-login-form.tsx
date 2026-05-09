@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -27,6 +27,7 @@ type CodeFormValues = z.infer<typeof codeSchema>;
 export function AuthLoginForm() {
   const [serverMessage, setServerMessage] = useState('');
   const [serverError, setServerError] = useState('');
+  const [verificationHelpEmail, setVerificationHelpEmail] = useState<string | null>(null);
   const [mode, setMode] = useState<'password' | 'code'>('password');
   const [codeRequested, setCodeRequested] = useState(false);
   const { setSession } = useAuth();
@@ -34,6 +35,12 @@ export function AuthLoginForm() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') || '/dashboard';
   const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+
+  useEffect(() => {
+    if (searchParams.get('verified') === '1') {
+      setServerMessage('Email verified. You can sign in now.');
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -51,6 +58,7 @@ export function AuthLoginForm() {
   const onSubmit = async (values: LoginFormValues) => {
     setServerMessage('');
     setServerError('');
+    setVerificationHelpEmail(null);
     try {
       const result = await login(values);
       setSession(result);
@@ -59,6 +67,9 @@ export function AuthLoginForm() {
     } catch (error) {
       if (error instanceof ApiError) {
         setServerError(error.message);
+        if (error.code === 'EMAIL_NOT_VERIFIED') {
+          setVerificationHelpEmail(values.email.trim().toLowerCase());
+        }
         return;
       }
       setServerError(error instanceof Error ? error.message : 'Login failed');
@@ -100,7 +111,7 @@ export function AuthLoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md hd-fade-up">
+    <Card surface="dark" className="w-full max-w-md hd-fade-up">
       <h1 className="text-2xl font-semibold tracking-tight text-neutral-50">Sign in</h1>
       <p className="mt-2 text-sm text-neutral-300">Use your email with a password or a one-time code.</p>
 
@@ -111,6 +122,7 @@ export function AuthLoginForm() {
             setMode('password');
             setServerError('');
             setServerMessage('');
+            setVerificationHelpEmail(null);
           }}
           className={`rounded-md px-3 py-2 text-sm font-medium transition ${
             mode === 'password' ? 'bg-neutral-900 text-neutral-50' : 'text-neutral-300 hover:bg-neutral-900'
@@ -124,6 +136,7 @@ export function AuthLoginForm() {
             setMode('code');
             setServerError('');
             setServerMessage('');
+            setVerificationHelpEmail(null);
           }}
           className={`rounded-md px-3 py-2 text-sm font-medium transition ${
             mode === 'code' ? 'bg-neutral-900 text-neutral-50' : 'text-neutral-300 hover:bg-neutral-900'
@@ -154,6 +167,11 @@ export function AuthLoginForm() {
           <Button className="w-full" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Signing in...' : 'Sign in'}
           </Button>
+          <p className="text-center text-sm">
+            <Link href="/auth/forgot-password" className="font-medium text-emerald-300 hover:text-emerald-200">
+              Forgot password?
+            </Link>
+          </p>
         </form>
       ) : (
         <form className="mt-6 space-y-4" onSubmit={handleSubmitCode(onVerifyCode)}>
@@ -248,6 +266,16 @@ export function AuthLoginForm() {
 
       {serverMessage ? <p className="mt-4 text-sm text-emerald-300">{serverMessage}</p> : null}
       {serverError ? <p className="mt-4 text-sm text-rose-400">{serverError}</p> : null}
+      {mode === 'password' && verificationHelpEmail ? (
+        <p className="mt-3 text-center text-sm text-neutral-300">
+          <Link
+            href={`/auth/check-inbox?email=${encodeURIComponent(verificationHelpEmail)}`}
+            className="font-medium text-emerald-300 underline-offset-2 hover:text-emerald-200 hover:underline"
+          >
+            Didn&apos;t get the email? Open the verification page
+          </Link>
+        </p>
+      ) : null}
 
       <p className="mt-4 text-sm text-neutral-300">
         No account?{' '}

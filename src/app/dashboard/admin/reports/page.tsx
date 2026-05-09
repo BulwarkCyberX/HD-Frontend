@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Card } from '@hackersdeal/ui';
+import { Badge, Button, Card, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { getReportStatusTone } from '@/lib/reports/status';
@@ -105,8 +105,7 @@ export default function AdminReportsTriagePage() {
               <p className="text-xs text-slate-500">
                 Project: {report.project.title} | Provider: {report.submitter.email} | Severity: {report.severity}
               </p>
-              <textarea
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              <Textarea
                 rows={3}
                 placeholder="Triage notes"
                 value={notes[report.id] ?? ''}

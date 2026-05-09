@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Badge, Button, Card } from '@hackersdeal/ui';
+import { Badge, Button, Card, Textarea } from '@hackersdeal/ui';
 import { FileAttachmentControl } from '@/components/file-attachment-control';
 import { StarRating } from '@/components/star-rating';
 import { useAuth } from '@/hooks/auth-context';
@@ -438,8 +438,7 @@ export default function ProjectWorkspacePage() {
                           value={reportForm.title}
                           onChange={(e) => setReportForm((prev) => ({ ...prev, title: e.target.value }))}
                         />
-                        <textarea
-                          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        <Textarea
                           rows={4}
                           placeholder="Description"
                           value={reportForm.description}
@@ -553,8 +552,7 @@ export default function ProjectWorkspacePage() {
                         ) : (
                           <>
                             <StarRating value={reviewRating} onChange={setReviewRating} />
-                            <textarea
-                              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                            <Textarea
                               rows={3}
                               placeholder="Share provider feedback (optional)"
                               value={reviewComment}

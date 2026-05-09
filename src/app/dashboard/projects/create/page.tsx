@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Card, Input } from '@hackersdeal/ui';
+import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { aiSuggestScope } from '@/lib/api/ai';
@@ -149,12 +149,7 @@ export default function CreateProjectPage() {
             <label htmlFor="description" className="text-sm font-medium text-slate-700">
               Description
             </label>
-            <textarea
-              id="description"
-              rows={4}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-emerald-500"
-              {...register('description')}
-            />
+            <Textarea id="description" rows={4} {...register('description')} />
             {errors.description ? (
               <p className="text-xs text-rose-600">{errors.description.message}</p>
             ) : null}
@@ -164,9 +159,9 @@ export default function CreateProjectPage() {
         <Card className="space-y-4">
           <h2 className="text-base font-semibold text-slate-900">2) Assets</h2>
           {fields.map((field, index) => (
-            <div key={field.id} className="grid gap-2 rounded-md border border-slate-200 p-3 sm:grid-cols-3">
+            <div key={field.id} className="grid gap-2 rounded-md border border-tropical-jade-100 p-3 sm:grid-cols-3">
               <select
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                className="rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm text-slate-900"
                 {...register(`assets.${index}.type`)}
               >
                 <option value="DOMAIN">Domain</option>
@@ -239,12 +234,7 @@ export default function CreateProjectPage() {
             <label htmlFor="inScopeRaw" className="text-sm font-medium text-slate-700">
               In-scope (one per line)
             </label>
-            <textarea
-              id="inScopeRaw"
-              rows={4}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-emerald-500"
-              {...register('inScopeRaw')}
-            />
+            <Textarea id="inScopeRaw" rows={4} {...register('inScopeRaw')} />
             {errors.inScopeRaw ? (
               <p className="text-xs text-rose-600">{errors.inScopeRaw.message}</p>
             ) : null}
@@ -253,12 +243,7 @@ export default function CreateProjectPage() {
             <label htmlFor="outOfScopeRaw" className="text-sm font-medium text-slate-700">
               Out-of-scope (one per line)
             </label>
-            <textarea
-              id="outOfScopeRaw"
-              rows={3}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-emerald-500"
-              {...register('outOfScopeRaw')}
-            />
+            <Textarea id="outOfScopeRaw" rows={3} {...register('outOfScopeRaw')} />
           </div>
         </Card>
 
@@ -295,7 +280,7 @@ export default function CreateProjectPage() {
               </label>
               <select
                 id="budgetType"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="w-full rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm text-slate-900"
                 {...register('budgetType')}
               >
                 <option value="FIXED">Fixed</option>
@@ -324,7 +309,7 @@ export default function CreateProjectPage() {
         <Card className="space-y-4">
           <h2 className="text-base font-semibold text-slate-900">6) Visibility</h2>
           <select
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm sm:w-64"
+            className="w-full rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm text-slate-900 sm:w-64"
             {...register('visibility')}
           >
             <option value="PUBLIC">Public</option>

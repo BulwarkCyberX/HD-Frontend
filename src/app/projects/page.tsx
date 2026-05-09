@@ -30,11 +30,11 @@ export default function ProjectsPage() {
   }, []);
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-5xl px-4 py-10 sm:px-6">
+    <div className="w-full max-w-5xl px-1 py-2 sm:px-2 sm:py-4">
       <div className="space-y-5">
         <div className="hd-fade-up">
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-50">Open Projects</h1>
-          <p className="mt-2 text-sm text-neutral-300">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Open Projects</h1>
+          <p className="mt-2 text-sm text-slate-600">
             Browse public projects. You can view scope and pricing without logging in.
           </p>
           <div className="mt-4">
@@ -46,7 +46,7 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {loading ? <p className="text-sm text-neutral-300">Loading projects...</p> : null}
+        {loading ? <p className="text-sm text-slate-600">Loading projects...</p> : null}
         {errorMessage ? <p className="text-sm text-rose-400">{errorMessage}</p> : null}
 
         <div className="space-y-3 hd-fade-in">
@@ -60,21 +60,21 @@ export default function ProjectsPage() {
                   <div className="flex flex-wrap gap-3">
                     <Link
                       href={`/projects/${project.id}`}
-                      className="text-sm font-medium text-emerald-300 hover:text-emerald-200"
+                      className="text-sm font-medium text-tropical-jade-700 hover:text-tropical-jade-600"
                     >
                       View details
                     </Link>
                     {user?.role === 'PROVIDER' ? (
                       <Link
                         href={`/projects/${project.id}/bid`}
-                        className="text-sm font-medium text-neutral-200 hover:text-neutral-50"
+                        className="text-sm font-medium text-slate-800 hover:text-slate-950"
                       >
                         Submit bid
                       </Link>
                     ) : (
                       <Link
                         href={`/auth/login?next=${next}`}
-                        className="text-sm font-medium text-neutral-300 hover:text-neutral-50"
+                        className="text-sm font-medium text-slate-600 hover:text-slate-900"
                       >
                         Login to bid
                       </Link>
@@ -86,6 +86,6 @@ export default function ProjectsPage() {
           })}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
