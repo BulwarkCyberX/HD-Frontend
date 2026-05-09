@@ -57,7 +57,7 @@ export function NotificationBell() {
           setOpen((o) => !o);
           if (!open) void load();
         }}
-        className="relative rounded-md p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+        className="relative rounded-md p-2 text-neutral-300 transition hover:bg-neutral-900 hover:text-neutral-50"
         aria-label="Notifications"
       >
         <span className="text-lg" aria-hidden>
@@ -71,28 +71,28 @@ export function NotificationBell() {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-          <p className="border-b border-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
+        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-neutral-800 bg-neutral-950 py-1 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <p className="border-b border-neutral-900 px-3 py-2 text-xs font-semibold text-neutral-400">
             Notifications
           </p>
           {error ? <p className="px-3 py-2 text-xs text-rose-600">{error}</p> : null}
           <ul className="max-h-80 overflow-y-auto">
             {items.length === 0 ? (
-              <li className="px-3 py-4 text-sm text-slate-500">No notifications yet.</li>
+              <li className="px-3 py-4 text-sm text-neutral-400">No notifications yet.</li>
             ) : (
               items.map((n) => (
-                <li key={n.id} className="border-b border-slate-50 last:border-0">
+                <li key={n.id} className="border-b border-neutral-900 last:border-0">
                   <button
                     type="button"
-                    className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm transition hover:bg-slate-50 ${
-                      n.read ? 'text-slate-600' : 'bg-emerald-50/80 font-medium text-slate-900'
+                    className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm transition hover:bg-neutral-900 ${
+                      n.read ? 'text-neutral-300' : 'bg-emerald-500/10 font-medium text-neutral-50'
                     }`}
                     onClick={() => {
                       if (!n.read) void onMarkRead(n.id);
                     }}
                   >
                     <span>{n.message}</span>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-neutral-500">
                       {new Date(n.createdAt).toLocaleString()}
                     </span>
                   </button>

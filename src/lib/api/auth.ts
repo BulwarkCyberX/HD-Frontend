@@ -30,10 +30,25 @@ type LoginPayload = {
   password: string;
 };
 
+type RequestLoginCodePayload = {
+  email: string;
+};
+
+type VerifyLoginCodePayload = {
+  email: string;
+  code: string;
+};
+
 type RegisterPayload = {
   email: string;
   password: string;
   role?: 'CLIENT' | 'PROVIDER' | 'ADMIN';
+  firstName: string;
+  lastName: string;
+  country: string;
+  city: string;
+  state: string;
+  postalCode: string;
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -80,6 +95,34 @@ export async function login(payload: LoginPayload) {
   }
 }
 
+export async function requestLoginCode(payload: RequestLoginCodePayload) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login/code/request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse<{ ok: true }>(res);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new Error('Unable to reach authentication service');
+  }
+}
+
+export async function verifyLoginCode(payload: VerifyLoginCodePayload) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/login/code/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await parseResponse<AuthResponse>(res);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new Error('Unable to reach authentication service');
+  }
+}
+
 export async function register(payload: RegisterPayload) {
   try {
     const res = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -91,6 +134,18 @@ export async function register(payload: RegisterPayload) {
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to reach registration service');
+  }
+}
+
+export async function checkEmailAvailability(email: string) {
+  try {
+    const url = new URL(`${API_BASE_URL}/auth/check-email`);
+    url.searchParams.set('email', email);
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    return await parseResponse<{ available: boolean }>(res);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new Error('Unable to check email availability');
   }
 }
 

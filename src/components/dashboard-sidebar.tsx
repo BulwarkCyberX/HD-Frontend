@@ -23,9 +23,9 @@ export function DashboardSidebar() {
   ];
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:block">
-      <div className="border-b border-slate-200 p-4">
-        <p className="text-sm font-semibold text-slate-900">Workspace</p>
+    <aside className="hidden w-64 shrink-0 border-r border-neutral-800 bg-neutral-950/70 backdrop-blur md:block">
+      <div className="border-b border-neutral-800 p-4">
+        <p className="text-sm font-semibold text-neutral-50">Workspace</p>
       </div>
       <nav className="space-y-1 p-3">
         {items.map((item) => {
@@ -36,8 +36,8 @@ export function DashboardSidebar() {
               href={item.href}
               className={`block rounded-md px-3 py-2 text-sm transition ${
                 active
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
+                  : 'text-neutral-300 hover:bg-neutral-900 hover:text-neutral-50'
               }`}
             >
               {item.label}

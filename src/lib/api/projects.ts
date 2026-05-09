@@ -89,12 +89,32 @@ export async function getProjects(token: string) {
   }
 }
 
+export async function getPublicProjects() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects`, { cache: 'no-store' });
+    return await parseResponse<ProjectItem[]>(res);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new Error('Unable to fetch projects');
+  }
+}
+
 export async function getProjectById(token: string, id: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
+    return await parseResponse<ProjectItem>(res);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new Error('Unable to fetch project details');
+  }
+}
+
+export async function getPublicProjectById(id: string) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects/${id}`, { cache: 'no-store' });
     return await parseResponse<ProjectItem>(res);
   } catch (error) {
     if (error instanceof ApiError) throw error;

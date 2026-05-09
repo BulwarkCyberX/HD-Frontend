@@ -4,11 +4,10 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Badge, Button, Card } from '@hackersdeal/ui';
-import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError, getProviderProfile, type AuthUser } from '@/lib/api/auth';
 import { getBidsForProject, type BidItem, updateBidStatus } from '@/lib/api/bids';
-import { getProjectById, type ProjectItem } from '@/lib/api/projects';
+import { getProjectById, getPublicProjectById, type ProjectItem } from '@/lib/api/projects';
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -25,25 +24,24 @@ export default function ProjectDetailPage() {
   );
 
   useEffect(() => {
-    if (!token) return;
     const run = async () => {
       setErrorMessage('');
       try {
-        const projectRow = await getProjectById(token, params.id);
+        const projectRow = token ? await getProjectById(token, params.id) : await getPublicProjectById(params.id);
         setProject(projectRow);
-        if (projectRow.selectedProviderId) {
+        if (token && projectRow.selectedProviderId) {
           const providerRow = await getProviderProfile(token, projectRow.selectedProviderId);
           setSelectedProviderProfile(providerRow);
         } else {
           setSelectedProviderProfile(null);
         }
 
-        if (user?.role === 'CLIENT') {
+        if (token && user?.role === 'CLIENT') {
           const bidRows = await getBidsForProject(token, params.id);
           setBids(bidRows);
         }
       } catch (error) {
-        if (error instanceof ApiError && error.status === 401) {
+        if (token && error instanceof ApiError && error.status === 401) {
           logout();
           return;
         }
@@ -68,116 +66,129 @@ export default function ProjectDetailPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-5xl px-4 py-8 sm:px-6">
-        {loading ? <p className="text-sm text-slate-600">Loading project...</p> : null}
-        {errorMessage ? <p className="mb-4 text-sm text-rose-600">{errorMessage}</p> : null}
+    <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-5xl px-4 py-8 sm:px-6">
+      {loading ? <p className="text-sm text-neutral-300">Loading project...</p> : null}
+      {errorMessage ? <p className="mb-4 text-sm text-rose-400">{errorMessage}</p> : null}
 
-        {project ? (
-          <div className="space-y-6">
-            <Card>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h1 className="text-2xl font-semibold text-slate-900">{project.title}</h1>
-                  <p className="mt-2 text-sm text-slate-600">{project.description}</p>
-                </div>
-                <Badge tone={project.status === 'COMPLETED' || project.status === 'ACTIVE' ? 'success' : 'warning'}>
-                  {project.status}
-                </Badge>
+      {project ? (
+        <div className="space-y-6">
+          <Card className="hd-fade-up">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h1 className="text-2xl font-semibold text-neutral-50">{project.title}</h1>
+                <p className="mt-2 text-sm text-neutral-300">{project.description}</p>
               </div>
-              <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-                <p>
-                  <span className="font-medium text-slate-900">Budget:</span> {project.budgetType} ({project.budgetAmount})
-                </p>
-                <p>
-                  <span className="font-medium text-slate-900">Timeline:</span> {project.timeline}
-                </p>
-                <p>
-                  <span className="font-medium text-slate-900">Testing Window:</span> {project.testingWindow}
-                </p>
-                <p>
-                  <span className="font-medium text-slate-900">Visibility:</span> {project.visibility}
-                </p>
-              </div>
-              <div className="mt-4">
-                <Link href="/projects" className="text-sm text-emerald-700 hover:text-emerald-800">
-                  Back to projects
+              <Badge tone={project.status === 'COMPLETED' || project.status === 'ACTIVE' ? 'success' : 'warning'}>
+                {project.status}
+              </Badge>
+            </div>
+            <div className="mt-4 grid gap-2 text-sm text-neutral-300 sm:grid-cols-2">
+              <p>
+                <span className="font-medium text-neutral-50">Cost:</span>{' '}
+                {project.budgetType === 'HOURLY' ? `₹${project.budgetAmount}/hr` : `₹${project.budgetAmount}`}{' '}
+                <span className="text-neutral-500">({project.budgetType})</span>
+              </p>
+              <p>
+                <span className="font-medium text-neutral-50">Timeline:</span> {project.timeline}
+              </p>
+              <p>
+                <span className="font-medium text-neutral-50">Testing Window:</span> {project.testingWindow}
+              </p>
+              <p>
+                <span className="font-medium text-neutral-50">Visibility:</span> {project.visibility}
+              </p>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              <Link href="/projects" className="text-sm font-medium text-emerald-300 hover:text-emerald-200">
+                Back to projects
+              </Link>
+              {canAccessWorkspace ? (
+                <Link
+                  href={`/dashboard/projects/${project.id}`}
+                  className="text-sm font-medium text-neutral-200 hover:text-neutral-50"
+                >
+                  Open workspace
                 </Link>
-                {canAccessWorkspace ? (
-                  <Link
-                    href={`/dashboard/projects/${project.id}`}
-                    className="ml-4 text-sm text-indigo-700 hover:text-indigo-800"
-                  >
-                    Open workspace
-                  </Link>
-                ) : null}
-              </div>
-              {selectedProviderProfile?.providerProfile ? (
-                <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                  <p className="mb-1 font-medium text-slate-900">Selected Provider Reputation</p>
-                  <p>
-                    Rating: {selectedProviderProfile.providerProfile.rating.toFixed(1)} | Reviews:{' '}
-                    {selectedProviderProfile.providerProfile.totalReviews} | Completed:{' '}
-                    {selectedProviderProfile.providerProfile.completedProjects}
-                  </p>
-                  <p>
-                    Valid reports: {selectedProviderProfile.providerProfile.validReportCount} | Reputation score:{' '}
-                    {selectedProviderProfile.providerProfile.reputationScore.toFixed(2)}
-                  </p>
-                </div>
               ) : null}
-            </Card>
-
-            {user?.role === 'CLIENT' ? (
-              <section className="space-y-4">
-                <h2 className="text-xl font-semibold text-slate-900">Bids</h2>
-                {bids.length === 0 ? (
-                  <p className="text-sm text-slate-600">No bids submitted yet.</p>
-                ) : (
-                  bids.map((bid) => (
-                    <Card key={bid.id}>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            Provider: {bid.provider?.email ?? bid.providerId}
-                          </p>
-                          <p className="mt-2 text-sm text-slate-600">{bid.proposal}</p>
-                          <p className="mt-2 text-xs text-slate-500">
-                            Price: {bid.price} | Timeline: {bid.timeline}
-                          </p>
-                          {bid.provider?.providerProfile ? (
-                            <p className="mt-1 text-xs text-slate-500">
-                              Rating: {bid.provider.providerProfile.rating.toFixed(1)} | Reviews:{' '}
-                              {bid.provider.providerProfile.totalReviews} | Completed:{' '}
-                              {bid.provider.providerProfile.completedProjects} | Valid reports:{' '}
-                              {bid.provider.providerProfile.validReportCount} | Reputation:{' '}
-                              {bid.provider.providerProfile.reputationScore.toFixed(2)}
-                            </p>
-                          ) : null}
-                        </div>
-                        <Badge tone={bid.status === 'ACCEPTED' ? 'success' : bid.status === 'REJECTED' ? 'warning' : 'default'}>
-                          {bid.status}
-                        </Badge>
-                      </div>
-
-                      {bid.status === 'PENDING' ? (
-                        <div className="mt-4 flex gap-2">
-                          <Button type="button" onClick={() => handleStatusUpdate(bid.id, 'ACCEPTED')}>
-                            Accept
-                          </Button>
-                          <Button type="button" variant="secondary" onClick={() => handleStatusUpdate(bid.id, 'REJECTED')}>
-                            Reject
-                          </Button>
-                        </div>
-                      ) : null}
-                    </Card>
-                  ))
-                )}
-              </section>
+              {user?.role === 'PROVIDER' ? (
+                <Link
+                  href={token ? `/projects/${project.id}/bid` : `/auth/login?next=${encodeURIComponent(`/projects/${project.id}/bid`)}`}
+                >
+                  <Button variant="secondary">Bid on this project</Button>
+                </Link>
+              ) : (
+                <Link href={`/auth/login?next=${encodeURIComponent(`/projects/${project.id}`)}`}>
+                  <Button variant="secondary">Login to bid / chat</Button>
+                </Link>
+              )}
+            </div>
+            {selectedProviderProfile?.providerProfile ? (
+              <div className="mt-4 rounded-md border border-neutral-800 bg-neutral-950/40 p-3 text-xs text-neutral-300">
+                <p className="mb-1 font-medium text-neutral-50">Selected Provider Reputation</p>
+                <p>
+                  Rating: {selectedProviderProfile.providerProfile.rating.toFixed(1)} | Reviews:{' '}
+                  {selectedProviderProfile.providerProfile.totalReviews} | Completed:{' '}
+                  {selectedProviderProfile.providerProfile.completedProjects}
+                </p>
+                <p>
+                  Valid reports: {selectedProviderProfile.providerProfile.validReportCount} | Reputation score:{' '}
+                  {selectedProviderProfile.providerProfile.reputationScore.toFixed(2)}
+                </p>
+              </div>
             ) : null}
-          </div>
-        ) : null}
-      </main>
-    </ProtectedRoute>
+          </Card>
+
+          {token && user?.role === 'CLIENT' ? (
+            <section className="space-y-4 hd-fade-in">
+              <h2 className="text-xl font-semibold text-neutral-50">Bids</h2>
+              {bids.length === 0 ? (
+                <p className="text-sm text-neutral-300">No bids submitted yet.</p>
+              ) : (
+                bids.map((bid) => (
+                  <Card key={bid.id}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-neutral-50">
+                          Provider: {bid.provider?.email ?? bid.providerId}
+                        </p>
+                        <p className="mt-2 text-sm text-neutral-300">{bid.proposal}</p>
+                        <p className="mt-2 text-xs text-neutral-500">
+                          Price: {bid.price} | Timeline: {bid.timeline}
+                        </p>
+                        {bid.provider?.providerProfile ? (
+                          <p className="mt-1 text-xs text-neutral-500">
+                            Rating: {bid.provider.providerProfile.rating.toFixed(1)} | Reviews:{' '}
+                            {bid.provider.providerProfile.totalReviews} | Completed:{' '}
+                            {bid.provider.providerProfile.completedProjects} | Valid reports:{' '}
+                            {bid.provider.providerProfile.validReportCount} | Reputation:{' '}
+                            {bid.provider.providerProfile.reputationScore.toFixed(2)}
+                          </p>
+                        ) : null}
+                      </div>
+                      <Badge
+                        tone={bid.status === 'ACCEPTED' ? 'success' : bid.status === 'REJECTED' ? 'warning' : 'default'}
+                      >
+                        {bid.status}
+                      </Badge>
+                    </div>
+
+                    {bid.status === 'PENDING' ? (
+                      <div className="mt-4 flex gap-2">
+                        <Button type="button" onClick={() => handleStatusUpdate(bid.id, 'ACCEPTED')}>
+                          Accept
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={() => handleStatusUpdate(bid.id, 'REJECTED')}>
+                          Reject
+                        </Button>
+                      </div>
+                    ) : null}
+                  </Card>
+                ))
+              )}
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+    </main>
   );
 }

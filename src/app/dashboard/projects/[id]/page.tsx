@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Badge, Button, Card } from '@hackersdeal/ui';
 import { FileAttachmentControl } from '@/components/file-attachment-control';
@@ -64,7 +64,7 @@ export default function ProjectWorkspacePage() {
   }, [project, user]);
   const canSubmitReview = Boolean(isProjectOwner && project?.status === 'COMPLETED' && !project.review);
 
-  const loadWorkspaceData = async (authToken: string, projectId: string) => {
+  const loadWorkspaceData = useCallback(async (authToken: string, projectId: string) => {
     const projectRow = await getProjectById(authToken, projectId);
     setProject(projectRow);
 
@@ -80,7 +80,7 @@ export default function ProjectWorkspacePage() {
     ]);
     setMessages(messageRows);
     setReports(reportRows);
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!token) return;
@@ -99,7 +99,7 @@ export default function ProjectWorkspacePage() {
       }
     };
     void run();
-  }, [logout, params.id, token]);
+  }, [loadWorkspaceData, logout, params.id, token]);
 
   useEffect(() => {
     if (!token || !isParticipant) return;
