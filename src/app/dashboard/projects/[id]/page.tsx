@@ -12,9 +12,13 @@ import { fetchAuthenticatedFile } from '@/lib/api/files';
 import { getMessages, sendMessage, type WorkspaceMessage } from '@/lib/api/messages';
 import { completeProject, depositPayment, releasePayment } from '@/lib/api/payments';
 import { RazorpayCheckoutButton } from '@/components/razorpay-checkout-button';
+import { OpenDisputeDialog } from '@/components/open-dispute-dialog';
+import { DisputePanel } from '@/components/dispute-panel';
 import { getProjectById, type ProjectItem } from '@/lib/api/projects';
+import { AiTriageHints } from '@/components/ai-triage-hints';
 import { createReport, getReports, type WorkspaceReport } from '@/lib/api/reports';
-import { createReview } from '@/lib/api/reviews';
+import { createClientReview, createReview } from '@/lib/api/reviews';
+import { HourlyPanel } from '@/components/hourly-panel';
 import { getReportStatusTone } from '@/lib/reports/status';
 import {
   approveMilestone,
@@ -32,7 +36,7 @@ import {
 import { getWalletMe, type WalletSummary } from '@/lib/api/wallets';
 import { useProjectSocket } from '@/hooks/use-project-socket';
 
-type WorkspaceTab = 'chat' | 'reports' | 'milestones';
+type WorkspaceTab = 'chat' | 'reports' | 'milestones' | 'hourly';
 
 type MilestonesPanelProps = {
   token: string;
@@ -296,9 +300,12 @@ export default function ProjectWorkspacePage() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isReleasing, setIsReleasing] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isSubmittingClientReview, setIsSubmittingClientReview] = useState(false);
   const [depositAmount, setDepositAmount] = useState(1000);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
+  const [clientReviewRating, setClientReviewRating] = useState(5);
+  const [clientReviewComment, setClientReviewComment] = useState('');
   const [attachMessageId, setAttachMessageId] = useState<string | null>(null);
   const [attachWorkspaceReportId, setAttachWorkspaceReportId] = useState<string | null>(null);
   const [aiReportHint, setAiReportHint] = useState<string | null>(null);
@@ -325,6 +332,9 @@ export default function ProjectWorkspacePage() {
     return project.clientId === user.id;
   }, [project, user]);
   const canSubmitReview = Boolean(isProjectOwner && project?.status === 'COMPLETED' && !project.review);
+  const canSubmitClientReview = Boolean(
+    isSelectedProvider && project?.status === 'COMPLETED' && !project.clientReview,
+  );
 
   const loadWorkspaceData = useCallback(async (authToken: string, projectId: string) => {
     const projectRow = await getProjectById(authToken, projectId);
@@ -544,6 +554,26 @@ export default function ProjectWorkspacePage() {
     }
   };
 
+  const handleSubmitClientReview = async () => {
+    if (!token || !project || !canSubmitClientReview) return;
+    setIsSubmittingClientReview(true);
+    setActionMessage('');
+    try {
+      await createClientReview(token, {
+        projectId: project.id,
+        rating: clientReviewRating,
+        comment: clientReviewComment.trim() || undefined,
+      });
+      await loadWorkspaceData(token, project.id);
+      setClientReviewComment('');
+      setActionMessage('Client review submitted.');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to submit client review');
+    } finally {
+      setIsSubmittingClientReview(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {loading ? <p className="text-sm text-slate-600">Loading workspace...</p> : null}
@@ -642,6 +672,16 @@ export default function ProjectWorkspacePage() {
                   : `Payment status: ${project.payment?.status ?? 'NOT_DEPOSITED'}`}
               </div>
             ) : null}
+            {isParticipant && token ? (
+              <div className="space-y-4 border-t border-slate-200 pt-3">
+                <OpenDisputeDialog token={token} projectId={project.id} />
+                <DisputePanel
+                  token={token}
+                  projectId={project.id}
+                  isAdmin={user?.role === 'ADMIN'}
+                />
+              </div>
+            ) : null}
             {project.selectedProvider?.providerProfile ? (
               <div className="rounded-md border border-slate-200 p-3 text-xs text-slate-600">
                 <p className="mb-1 font-semibold text-slate-900">Provider Reputation</p>
@@ -684,15 +724,27 @@ export default function ProjectWorkspacePage() {
                   >
                     Reports
                   </button>
-                  <button
-                    type="button"
-                    className={`rounded-md px-3 py-1.5 text-sm ${
-                      activeTab === 'milestones' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                    onClick={() => setActiveTab('milestones')}
-                  >
-                    Milestones
-                  </button>
+                  {project.budgetType === 'HOURLY' ? (
+                    <button
+                      type="button"
+                      className={`rounded-md px-3 py-1.5 text-sm ${
+                        activeTab === 'hourly' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
+                      }`}
+                      onClick={() => setActiveTab('hourly')}
+                    >
+                      Time log
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={`rounded-md px-3 py-1.5 text-sm ${
+                        activeTab === 'milestones' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
+                      }`}
+                      onClick={() => setActiveTab('milestones')}
+                    >
+                      Milestones
+                    </button>
+                  )}
                 </div>
 
                 {activeTab === 'chat' ? (
@@ -746,6 +798,18 @@ export default function ProjectWorkspacePage() {
                       </div>
                     ) : null}
                   </div>
+                ) : activeTab === 'hourly' && token && project.budgetType === 'HOURLY' ? (
+                  <HourlyPanel
+                    token={token}
+                    projectId={params.id}
+                    isProjectOwner={isProjectOwner}
+                    isSelectedProvider={isSelectedProvider}
+                    paymentInEscrow={project.payment?.status === 'IN_ESCROW'}
+                    defaultHourlyRate={project.budgetAmount}
+                    onRefresh={refreshWorkspace}
+                    setActionMessage={setActionMessage}
+                    setErrorMessage={setErrorMessage}
+                  />
                 ) : activeTab === 'milestones' && token ? (
                   <MilestonesPanel
                     token={token}
@@ -862,6 +926,11 @@ export default function ProjectWorkspacePage() {
                             <p className="mt-2 text-xs text-slate-500">
                               Severity: {report.severity} | By: {report.submitter.email}
                             </p>
+                            {user?.role === 'ADMIN' || isSelectedProvider ? (
+                              <div className="mt-2">
+                                <AiTriageHints hints={report.aiTriageHints} />
+                              </div>
+                            ) : null}
                             {report.files?.length && token ? (
                               <ul className="mt-2 space-y-0.5 text-xs">
                                 {report.files.map((f) => (
@@ -880,6 +949,34 @@ export default function ProjectWorkspacePage() {
                         ))
                       )}
                     </div>
+                    {isSelectedProvider && project.status === 'COMPLETED' ? (
+                      <div className="space-y-3 rounded-md border border-slate-200 p-3">
+                        <p className="text-sm font-medium text-slate-900">Rate client</p>
+                        {project.clientReview ? (
+                          <p className="text-sm text-slate-600">
+                            Client review submitted: {project.clientReview.rating}/5
+                            {project.clientReview.comment ? ` - ${project.clientReview.comment}` : ''}
+                          </p>
+                        ) : (
+                          <>
+                            <StarRating value={clientReviewRating} onChange={setClientReviewRating} />
+                            <Textarea
+                              rows={3}
+                              placeholder="Share client feedback (optional)"
+                              value={clientReviewComment}
+                              onChange={(e) => setClientReviewComment(e.target.value)}
+                            />
+                            <Button
+                              type="button"
+                              disabled={isSubmittingClientReview}
+                              onClick={() => void handleSubmitClientReview()}
+                            >
+                              {isSubmittingClientReview ? 'Submitting...' : 'Submit client review'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    ) : null}
                     {isProjectOwner && project.status === 'COMPLETED' ? (
                       <div className="space-y-3 rounded-md border border-slate-200 p-3">
                         <p className="text-sm font-medium text-slate-900">Rate Provider</p>

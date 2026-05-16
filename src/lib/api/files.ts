@@ -36,6 +36,7 @@ export async function uploadFile(token: string, file: File, target: UploadTarget
   const res = await fetch(`${API_BASE_URL}/files/upload`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
     body: formData,
   });
   const json = (await res.json()) as unknown;

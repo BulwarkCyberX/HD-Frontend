@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type PublicProject = {
   id: string;
@@ -36,36 +36,41 @@ export type PublicProvider = {
   };
 };
 
-async function parseJson<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    throw new Error(typeof json === 'object' && json && 'message' in json ? String((json as { message: string }).message) : 'Request failed');
-  }
-  return json as T;
-}
+export type PublicProjectFilters = {
+  q?: string;
+  minBudget?: string;
+  maxBudget?: string;
+  budgetType?: string;
+  skill?: string;
+  sort?: 'newest' | 'budget_asc' | 'budget_desc';
+};
 
-export async function fetchPublicProjects(params?: Record<string, string>) {
-  const qs = params ? `?${new URLSearchParams(params)}` : '';
-  const res = await fetch(`${API_BASE_URL}/public/projects${qs}`, { cache: 'no-store' });
-  return parseJson<PublicProject[]>(res);
+export async function fetchPublicProjects(params?: PublicProjectFilters) {
+  const qs = params
+    ? `?${new URLSearchParams(
+        Object.entries(params)
+          .filter(([, v]) => v != null && v !== '')
+          .map(([k, v]) => [k, String(v)]),
+      )}`
+    : '';
+  return apiJson<PublicProject[]>(`/public/projects${qs}`, { cache: 'no-store', retryOnUnauthorized: false });
 }
 
 export async function fetchPublicProject(id: string) {
-  const res = await fetch(`${API_BASE_URL}/public/projects/${id}`, { cache: 'no-store' });
-  return parseJson<PublicProject>(res);
+  return apiJson<PublicProject>(`/public/projects/${id}`, { cache: 'no-store', retryOnUnauthorized: false });
 }
 
 export async function fetchPublicProvider(id: string) {
-  const res = await fetch(`${API_BASE_URL}/public/providers/${id}`, { cache: 'no-store' });
-  return parseJson<PublicProvider>(res);
+  return apiJson<PublicProvider>(`/public/providers/${id}`, { cache: 'no-store', retryOnUnauthorized: false });
 }
 
 export async function fetchFeaturedProviders() {
-  const res = await fetch(`${API_BASE_URL}/public/providers/featured/list`, { cache: 'no-store' });
-  return parseJson<unknown[]>(res);
+  return apiJson<unknown[]>('/public/providers/featured/list', { cache: 'no-store', retryOnUnauthorized: false });
 }
 
 export async function searchPublicProjects(q: string) {
-  const res = await fetch(`${API_BASE_URL}/public/search/projects?q=${encodeURIComponent(q)}`, { cache: 'no-store' });
-  return parseJson<unknown[]>(res);
+  return apiJson<unknown[]>(`/public/search/projects?q=${encodeURIComponent(q)}`, {
+    cache: 'no-store',
+    retryOnUnauthorized: false,
+  });
 }

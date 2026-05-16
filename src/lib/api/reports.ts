@@ -1,6 +1,22 @@
 import { ApiError } from './auth';
+import { apiJson } from './client';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+export type ReportAiTriageHints = {
+  suggestedSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | null;
+  submittedSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severityMatch: boolean;
+  rationale: string;
+  completeness: string;
+  missingFields: string[];
+  checklist: string[];
+  duplicate: {
+    likelyDuplicate: boolean;
+    score: number;
+    comparedReportId?: string;
+    rationale?: string;
+  } | null;
+  generatedAt: string;
+};
 
 export type WorkspaceReport = {
   id: string;
@@ -11,6 +27,7 @@ export type WorkspaceReport = {
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   status: 'SUBMITTED' | 'UNDER_REVIEW' | 'NEED_MORE_INFO' | 'VALID' | 'REJECTED';
   triageNotes: string | null;
+  aiTriageHints?: ReportAiTriageHints | null;
   validatedBy: string | null;
   createdAt: string;
   submitter: {
@@ -50,25 +67,9 @@ export type TriageReportPayload = {
   triageNotes: string;
 };
 
-async function parseResponse<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as T;
-}
-
 export async function getReports(token: string, projectId: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/${projectId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    return await parseResponse<WorkspaceReport[]>(res);
+    return await apiJson<WorkspaceReport[]>(`/reports/${projectId}`, { token, cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to load reports');
@@ -77,15 +78,7 @@ export async function getReports(token: string, projectId: string) {
 
 export async function createReport(token: string, payload: CreateReportPayload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    return await parseResponse<WorkspaceReport>(res);
+    return await apiJson<WorkspaceReport>('/reports', { method: 'POST', token, body: JSON.stringify(payload) });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to submit report');
@@ -94,28 +87,24 @@ export async function createReport(token: string, payload: CreateReportPayload) 
 
 export async function getAllReportsForAdmin(token: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/admin/all`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    return await parseResponse<WorkspaceReport[]>(res);
+    return await apiJson<WorkspaceReport[]>('/reports/admin/all', { token, cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to load reports for triage');
   }
 }
 
+export async function runReportAiTriage(token: string, reportId: string) {
+  return apiJson<WorkspaceReport>(`/reports/${reportId}/ai-triage`, { method: 'POST', token });
+}
+
 export async function triageReport(token: string, reportId: string, payload: TriageReportPayload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/reports/${reportId}/triage`, {
+    return await apiJson<WorkspaceReport>(`/reports/${reportId}/triage`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      token,
       body: JSON.stringify(payload),
     });
-    return await parseResponse<WorkspaceReport>(res);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to triage report');

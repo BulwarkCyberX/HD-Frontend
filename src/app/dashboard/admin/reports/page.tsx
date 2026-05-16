@@ -5,8 +5,10 @@ import { Badge, Button, Card, Textarea } from '@hackersdeal/ui';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { getReportStatusTone } from '@/lib/reports/status';
+import { AiTriageHints } from '@/components/ai-triage-hints';
 import {
   getAllReportsForAdmin,
+  runReportAiTriage,
   triageReport,
   type TriageReportPayload,
   type WorkspaceReport,
@@ -44,6 +46,21 @@ export default function AdminReportsTriagePage() {
     };
     void run();
   }, [logout, token]);
+
+  const handleAiTriage = async (reportId: string) => {
+    if (!token) return;
+    setPendingId(reportId);
+    setErrorMessage('');
+    try {
+      const updated = await runReportAiTriage(token, reportId);
+      setReports((prev) => prev.map((row) => (row.id === reportId ? updated : row)));
+      setActionMessage('AI triage suggestions updated.');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'AI triage failed');
+    } finally {
+      setPendingId(null);
+    }
+  };
 
   const handleTriage = async (
     reportId: string,
@@ -105,6 +122,15 @@ export default function AdminReportsTriagePage() {
               <p className="text-xs text-slate-500">
                 Project: {report.project.title} | Provider: {report.submitter.email} | Severity: {report.severity}
               </p>
+              <AiTriageHints hints={report.aiTriageHints} />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={pendingId === report.id}
+                onClick={() => void handleAiTriage(report.id)}
+              >
+                {pendingId === report.id ? 'Running AI…' : 'Run AI triage'}
+              </Button>
               <Textarea
                 rows={3}
                 placeholder="Triage notes"

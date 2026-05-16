@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type DisputeItem = {
   id: string;
@@ -14,49 +12,71 @@ export type DisputeItem = {
   resolvedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  project?: { id: string; title: string };
 };
 
-async function parseResponse<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as T;
-}
+export type DisputeComment = {
+  id: string;
+  body: string;
+  internal: boolean;
+  createdAt: string;
+  author: { id: string; email: string; role: string };
+};
+
+export type DisputeEvidence = {
+  id: string;
+  note: string | null;
+  createdAt: string;
+  fileAsset: {
+    id: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    url: string;
+  };
+};
+
+export type DisputeDetail = DisputeItem & {
+  project: {
+    id: string;
+    title: string;
+    clientId: string;
+    selectedProviderId: string | null;
+    status: string;
+  };
+  openedBy: { id: string; email: string; role: string };
+  comments: DisputeComment[];
+  evidence: DisputeEvidence[];
+};
 
 export async function listProjectDisputes(token: string, projectId: string) {
-  const res = await fetch(`${API_BASE_URL}/disputes/project/${projectId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  return parseResponse<DisputeItem[]>(res);
+  return apiJson<DisputeItem[]>(`/disputes/project/${projectId}`, { token, cache: 'no-store' });
+}
+
+export async function getDispute(token: string, disputeId: string) {
+  return apiJson<DisputeDetail>(`/disputes/${disputeId}`, { token, cache: 'no-store' });
 }
 
 export async function openDispute(
   token: string,
   payload: { projectId: string; category: string; title: string; description: string },
 ) {
-  const res = await fetch(`${API_BASE_URL}/disputes`, {
+  return apiJson<DisputeItem>('/disputes', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  return parseResponse<DisputeItem>(res);
 }
 
 export async function listAdminDisputes(token: string) {
-  const res = await fetch(`${API_BASE_URL}/disputes/admin/all`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
+  return apiJson<DisputeItem[]>('/disputes/admin/all', { token, cache: 'no-store' });
+}
+
+export async function markDisputeReview(token: string, disputeId: string) {
+  return apiJson<DisputeItem>(`/disputes/admin/${disputeId}/review`, {
+    method: 'PATCH',
+    token,
   });
-  return parseResponse<DisputeItem[]>(res);
 }
 
 export async function addDisputeComment(
@@ -64,29 +84,37 @@ export async function addDisputeComment(
   disputeId: string,
   payload: { body: string; internal?: boolean },
 ) {
-  const res = await fetch(`${API_BASE_URL}/disputes/${disputeId}/comments`, {
+  return apiJson<DisputeComment>(`/disputes/${disputeId}/comments`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  return parseResponse<unknown>(res);
+}
+
+export async function addDisputeEvidence(
+  token: string,
+  disputeId: string,
+  payload: { fileAssetId: string; note?: string },
+) {
+  return apiJson<DisputeEvidence>(`/disputes/${disputeId}/evidence`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function resolveDispute(
   token: string,
   disputeId: string,
-  payload: { resolution: string; status: 'RESOLVED' | 'REFUNDED' | 'REJECTED' },
+  payload: {
+    resolution: string;
+    status: 'RESOLVED' | 'REFUNDED' | 'REJECTED';
+    processEscrowRefund?: boolean;
+  },
 ) {
-  const res = await fetch(`${API_BASE_URL}/disputes/admin/${disputeId}/resolve`, {
+  return apiJson<DisputeItem>(`/disputes/admin/${disputeId}/resolve`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  return parseResponse<DisputeItem>(res);
 }

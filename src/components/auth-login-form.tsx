@@ -25,12 +25,21 @@ const codeSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 type CodeFormValues = z.infer<typeof codeSchema>;
 
+/** Testing-only quick login — hidden in production unless explicitly enabled via env. */
+const showAdminQuickLogin =
+  process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_ENABLE_ADMIN_QUICK_LOGIN === 'true';
+
+const DEV_ADMIN_EMAIL = process.env.NEXT_PUBLIC_DEV_ADMIN_EMAIL ?? 'admin@hackersdeal.com';
+const DEV_ADMIN_PASSWORD = process.env.NEXT_PUBLIC_DEV_ADMIN_PASSWORD ?? 'Admin12345!';
+const ADMIN_PANEL_PATH = '/dashboard/admin/reports';
+
 export function AuthLoginForm() {
   const [serverMessage, setServerMessage] = useState('');
   const [serverError, setServerError] = useState('');
   const [verificationHelpEmail, setVerificationHelpEmail] = useState<string | null>(null);
   const [mode, setMode] = useState<'password' | 'code'>('password');
   const [codeRequested, setCodeRequested] = useState(false);
+  const [adminQuickLoginBusy, setAdminQuickLoginBusy] = useState(false);
   const { setSession } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -90,6 +99,27 @@ export function AuthLoginForm() {
         return;
       }
       setServerError(error instanceof Error ? error.message : 'Could not request code');
+    }
+  };
+
+  const onQuickAdminLogin = async () => {
+    setServerMessage('');
+    setServerError('');
+    setVerificationHelpEmail(null);
+    setAdminQuickLoginBusy(true);
+    try {
+      const result = await login({ email: DEV_ADMIN_EMAIL, password: DEV_ADMIN_PASSWORD });
+      setSession(result);
+      setServerMessage('Admin login successful');
+      router.push(ADMIN_PANEL_PATH);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setServerError(error.message);
+        return;
+      }
+      setServerError(error instanceof Error ? error.message : 'Admin quick login failed');
+    } finally {
+      setAdminQuickLoginBusy(false);
     }
   };
 
@@ -172,6 +202,23 @@ export function AuthLoginForm() {
               Forgot password?
             </Link>
           </p>
+
+          {showAdminQuickLogin ? (
+            <div className="rounded-lg border border-dashed border-amber-500/40 bg-amber-500/5 p-3">
+              <p className="text-center text-xs font-medium uppercase tracking-wide text-amber-200/90">
+                Testing only
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                className="mt-2 w-full border-amber-500/30 bg-amber-500/10 text-amber-50 hover:bg-amber-500/20"
+                disabled={isSubmitting || adminQuickLoginBusy}
+                onClick={onQuickAdminLogin}
+              >
+                {adminQuickLoginBusy ? 'Opening admin panel...' : 'Quick login: Admin Panel'}
+              </Button>
+            </div>
+          ) : null}
         </form>
       ) : (
         <form className="mt-6 space-y-4" onSubmit={handleSubmitCode(onVerifyCode)}>

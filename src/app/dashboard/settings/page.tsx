@@ -7,8 +7,13 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/hooks/auth-context';
 import { getKycStatus, submitKyc, type KycStatusResponse } from '@/lib/api/kyc';
 import { getMyTransactions, type PaymentTransaction } from '@/lib/api/psp';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import {
+  listAuthSessions,
+  revokeAuthSession,
+  revokeOtherAuthSessions,
+  type UserSessionRow,
+} from '@/lib/api/sessions';
+import { updateUserSettings } from '@/lib/api/settings';
 
 export default function SettingsPage() {
   return (
@@ -19,7 +24,8 @@ export default function SettingsPage() {
 }
 
 function SettingsContent() {
-  const { token, user, logout } = useAuth();
+  const { token, user, logout, refreshUser } = useAuth();
+  const [emailDigestWeekly, setEmailDigestWeekly] = useState(true);
   const [kyc, setKyc] = useState<KycStatusResponse | null>(null);
   const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [panNumber, setPanNumber] = useState('');
@@ -27,18 +33,31 @@ function SettingsContent() {
   const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [bankIfsc, setBankIfsc] = useState('');
   const [bankAccountHolder, setBankAccountHolder] = useState('');
+  const [sessions, setSessions] = useState<UserSessionRow[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const reloadSessions = async () => {
+    if (!token) return;
+    setSessions(await listAuthSessions(token));
+  };
+
   useEffect(() => {
     if (!token) return;
-    void Promise.all([getKycStatus(token), getMyTransactions(token)])
-      .then(([k, tx]) => {
+    void Promise.all([getKycStatus(token), getMyTransactions(token), listAuthSessions(token), refreshUser()])
+      .then(([k, tx, s]) => {
         setKyc(k);
         setTransactions(tx);
+        setSessions(s);
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load settings'));
-  }, [token]);
+  }, [token, refreshUser]);
+
+  useEffect(() => {
+    if (user?.settings) {
+      setEmailDigestWeekly(user.settings.emailDigestWeekly);
+    }
+  }, [user?.settings]);
 
   const submitKycForm = async () => {
     if (!token) return;
@@ -61,12 +80,16 @@ function SettingsContent() {
 
   const revokeOthers = async () => {
     if (!token) return;
-    await fetch(`${API_BASE_URL}/auth/sessions/revoke-others`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
+    await revokeOtherAuthSessions(token);
     setMessage('Other sessions revoked.');
+    await reloadSessions();
+  };
+
+  const revokeOne = async (sessionId: string) => {
+    if (!token) return;
+    await revokeAuthSession(token, sessionId);
+    setMessage('Session revoked.');
+    await reloadSessions();
   };
 
   return (
@@ -90,6 +113,33 @@ function SettingsContent() {
             Sign out
           </Button>
         </div>
+      </Card>
+
+      <Card>
+        <h2 className="font-semibold text-slate-900">Integrations</h2>
+        <p className="mt-2 text-sm text-slate-600">API keys and outbound webhooks for automation.</p>
+        <Link href="/dashboard/integrations" className="mt-2 inline-block text-sm font-medium text-tropical-jade-700 underline">
+          Manage integrations →
+        </Link>
+      </Card>
+
+      <Card>
+        <h2 className="font-semibold text-slate-900">Notifications</h2>
+        <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={emailDigestWeekly}
+            onChange={async (e) => {
+              if (!token) return;
+              const next = e.target.checked;
+              setEmailDigestWeekly(next);
+              await updateUserSettings(token, { emailDigestWeekly: next });
+              await refreshUser();
+              setMessage('Notification preferences saved.');
+            }}
+          />
+          Weekly email digest (bids, milestones, and activity summary)
+        </label>
       </Card>
 
       <Card>
@@ -145,9 +195,28 @@ function SettingsContent() {
 
       <Card>
         <h2 className="font-semibold text-slate-900">Security</h2>
-        <p className="mt-2 text-sm text-slate-600">Sessions use httpOnly cookies when supported.</p>
+        <p className="mt-2 text-sm text-slate-600">Active sessions (httpOnly refresh cookies).</p>
+        {sessions.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-500">No active sessions.</p>
+        ) : (
+          <ul className="mt-3 space-y-2 text-sm">
+            {sessions.map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 px-3 py-2">
+                <span className="text-slate-600">
+                  {s.userAgent?.slice(0, 60) ?? 'Unknown device'}
+                  <span className="block text-xs text-slate-500">
+                    {s.ipAddress ?? 'IP hidden'} · Last used {new Date(s.lastUsedAt).toLocaleString()}
+                  </span>
+                </span>
+                <Button type="button" variant="secondary" onClick={() => void revokeOne(s.id)}>
+                  Revoke
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
         <Button variant="secondary" type="button" className="mt-3" onClick={() => void revokeOthers()}>
-          Revoke other sessions
+          Revoke all other sessions
         </Button>
       </Card>
 

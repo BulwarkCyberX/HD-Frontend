@@ -1,24 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Card } from '@hackersdeal/ui';
 import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/hooks/auth-context';
-import { ApiError } from '@/lib/api/auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-
-type KycRow = {
-  id: string;
-  userId: string;
-  status: string;
-  panNumberMasked: string | null;
-  panHolderName: string | null;
-  bankAccountLast4: string | null;
-  bankIfsc: string | null;
-  createdAt: string;
-  user: { id: string; email: string; firstName: string | null; lastName: string | null };
-};
+import { listPendingKyc, reviewKyc, type AdminKycRow } from '@/lib/api/kyc';
 
 export default function AdminKycPage() {
   return (
@@ -30,34 +16,22 @@ export default function AdminKycPage() {
 
 function AdminKycContent() {
   const { token, user } = useAuth();
-  const [rows, setRows] = useState<KycRow[]>([]);
+  const [rows, setRows] = useState<AdminKycRow[]>([]);
   const [error, setError] = useState('');
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!token) return;
-    const res = await fetch(`${API_BASE_URL}/kyc/admin/pending`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const json = await res.json();
-    if (!res.ok) throw new ApiError(res.status, String(json.message ?? 'Failed'));
-    setRows(json as KycRow[]);
-  };
+    setRows(await listPendingKyc(token));
+  }, [token]);
 
   useEffect(() => {
     if (user?.role !== 'ADMIN') return;
     void load().catch((e) => setError(e instanceof Error ? e.message : 'Load failed'));
-  }, [token, user?.role]);
+  }, [load, user?.role]);
 
   const review = async (id: string, approve: boolean) => {
     if (!token) return;
-    await fetch(`${API_BASE_URL}/kyc/admin/${id}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ approve }),
-    });
+    await reviewKyc(token, id, { approve });
     await load();
   };
 

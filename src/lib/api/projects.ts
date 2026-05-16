@@ -1,4 +1,5 @@
 import { ApiError } from './auth';
+import { apiJson } from './client';
 
 export type ProjectAsset = {
   type: 'DOMAIN' | 'URL' | 'IP';
@@ -31,6 +32,14 @@ export type ProjectItem = {
     } | null;
   } | null;
   review: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    clientId: string;
+    providerId: string;
+    createdAt: string;
+  } | null;
+  clientReview: {
     id: string;
     rating: number;
     comment: string | null;
@@ -78,11 +87,7 @@ async function parseResponse<T>(res: Response): Promise<T> {
 
 export async function getProjects(token: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/projects`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    return await parseResponse<ProjectItem[]>(res);
+    return await apiJson<ProjectItem[]>('/projects', { token, cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to fetch projects');
@@ -91,8 +96,7 @@ export async function getProjects(token: string) {
 
 export async function getPublicProjects() {
   try {
-    const res = await fetch(`${API_BASE_URL}/public/projects`, { cache: 'no-store' });
-    return await parseResponse<ProjectItem[]>(res);
+    return await apiJson<ProjectItem[]>('/public/projects', { cache: 'no-store', retryOnUnauthorized: false });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to fetch projects');
@@ -101,11 +105,7 @@ export async function getPublicProjects() {
 
 export async function getProjectById(token: string, id: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    return await parseResponse<ProjectItem>(res);
+    return await apiJson<ProjectItem>(`/projects/${id}`, { token, cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to fetch project details');
@@ -114,8 +114,7 @@ export async function getProjectById(token: string, id: string) {
 
 export async function getPublicProjectById(id: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/public/projects/${id}`, { cache: 'no-store' });
-    return await parseResponse<ProjectItem>(res);
+    return await apiJson<ProjectItem>(`/public/projects/${id}`, { cache: 'no-store', retryOnUnauthorized: false });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to fetch project details');
@@ -124,15 +123,11 @@ export async function getPublicProjectById(id: string) {
 
 export async function createProject(token: string, payload: CreateProjectPayload) {
   try {
-    const res = await fetch(`${API_BASE_URL}/projects`, {
+    return await apiJson<ProjectItem>('/projects', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      token,
       body: JSON.stringify(payload),
     });
-    return await parseResponse<ProjectItem>(res);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to create project');

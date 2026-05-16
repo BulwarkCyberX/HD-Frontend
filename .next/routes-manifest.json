@@ -20,12 +20,44 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/dashboard/admin/disputes/[id]",
+      "regex": "^/dashboard/admin/disputes/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/admin/disputes/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/emails/[key]",
+      "regex": "^/dashboard/admin/emails/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPkey": "nxtPkey"
+      },
+      "namedRegex": "^/dashboard/admin/emails/(?<nxtPkey>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/projects/[id]",
+      "regex": "^/dashboard/admin/projects/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/admin/projects/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/dashboard/bounty/[id]",
       "regex": "^/dashboard/bounty/([^/]+?)(?:/)?$",
       "routeKeys": {
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/dashboard/bounty/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/dashboard/organization/[id]",
+      "regex": "^/dashboard/organization/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/organization/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
       "page": "/dashboard/projects/[id]",
@@ -130,10 +162,28 @@
       "namedRegex": "^/dashboard(?:/)?$"
     },
     {
+      "page": "/dashboard/admin",
+      "regex": "^/dashboard/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/analytics",
+      "regex": "^/dashboard/admin/analytics(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/analytics(?:/)?$"
+    },
+    {
       "page": "/dashboard/admin/disputes",
       "regex": "^/dashboard/admin/disputes(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard/admin/disputes(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/emails",
+      "regex": "^/dashboard/admin/emails(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/emails(?:/)?$"
     },
     {
       "page": "/dashboard/admin/kyc",
@@ -142,10 +192,28 @@
       "namedRegex": "^/dashboard/admin/kyc(?:/)?$"
     },
     {
+      "page": "/dashboard/admin/projects",
+      "regex": "^/dashboard/admin/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/projects(?:/)?$"
+    },
+    {
       "page": "/dashboard/admin/reports",
       "regex": "^/dashboard/admin/reports(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard/admin/reports(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/settings",
+      "regex": "^/dashboard/admin/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/settings(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/withdrawals",
+      "regex": "^/dashboard/admin/withdrawals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/withdrawals(?:/)?$"
     },
     {
       "page": "/dashboard/bids",
@@ -158,6 +226,18 @@
       "regex": "^/dashboard/bounty(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/dashboard/bounty(?:/)?$"
+    },
+    {
+      "page": "/dashboard/integrations",
+      "regex": "^/dashboard/integrations(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/integrations(?:/)?$"
+    },
+    {
+      "page": "/dashboard/organization",
+      "regex": "^/dashboard/organization(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/organization(?:/)?$"
     },
     {
       "page": "/dashboard/profile",
@@ -190,6 +270,12 @@
       "namedRegex": "^/dashboard/withdrawals(?:/)?$"
     },
     {
+      "page": "/how-it-works",
+      "regex": "^/how\\-it\\-works(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/how\\-it\\-works(?:/)?$"
+    },
+    {
       "page": "/login",
       "regex": "^/login(?:/)?$",
       "routeKeys": {},
@@ -208,6 +294,12 @@
       "namedRegex": "^/marketplace(?:/)?$"
     },
     {
+      "page": "/pricing",
+      "regex": "^/pricing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pricing(?:/)?$"
+    },
+    {
       "page": "/projects",
       "regex": "^/projects(?:/)?$",
       "routeKeys": {},
@@ -218,6 +310,12 @@
       "regex": "^/signup(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/signup(?:/)?$"
+    },
+    {
+      "page": "/trust",
+      "regex": "^/trust(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/trust(?:/)?$"
     }
   ],
   "dataRoutes": [],

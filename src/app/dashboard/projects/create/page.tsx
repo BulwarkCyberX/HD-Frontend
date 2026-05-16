@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { aiSuggestScope } from '@/lib/api/ai';
 import { createProject } from '@/lib/api/projects';
+import { linkOrganizationProject, listMyOrganizations, type OrganizationSummary } from '@/lib/api/organizations';
 
 const assetSchema = z.object({
   type: z.enum(['DOMAIN', 'URL', 'IP']),
@@ -45,6 +46,15 @@ export default function CreateProjectPage() {
   const [serverError, setServerError] = useState('');
   const [serverSuccess, setServerSuccess] = useState('');
   const [aiScopeBusy, setAiScopeBusy] = useState(false);
+  const [organizations, setOrganizations] = useState<OrganizationSummary[]>([]);
+  const [organizationId, setOrganizationId] = useState('');
+
+  useEffect(() => {
+    if (!token || user?.role !== 'CLIENT') return;
+    void listMyOrganizations(token)
+      .then(setOrganizations)
+      .catch(() => undefined);
+  }, [token, user?.role]);
 
   const defaultValues = useMemo<ProjectFormValues>(
     () => ({
@@ -103,7 +113,7 @@ export default function CreateProjectPage() {
     }
 
     try {
-      await createProject(token, {
+      const created = await createProject(token, {
         title: values.title,
         description: values.description,
         assets: values.assets,
@@ -115,6 +125,9 @@ export default function CreateProjectPage() {
         budgetAmount: values.budgetAmount,
         visibility: values.visibility,
       });
+      if (organizationId) {
+        await linkOrganizationProject(token, organizationId, created.id);
+      }
       setServerSuccess('Project created successfully.');
       router.push('/projects?created=1');
     } catch (error) {
@@ -154,6 +167,26 @@ export default function CreateProjectPage() {
               <p className="text-xs text-rose-600">{errors.description.message}</p>
             ) : null}
           </div>
+          {organizations.length > 0 ? (
+            <div className="space-y-1.5">
+              <label htmlFor="organization" className="text-sm font-medium text-slate-700">
+                Organization (optional)
+              </label>
+              <select
+                id="organization"
+                className="w-full rounded-md border border-tropical-jade-200 bg-white px-3 py-2 text-sm"
+                value={organizationId}
+                onChange={(e) => setOrganizationId(e.target.value)}
+              >
+                <option value="">None</option>
+                {organizations.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
         </Card>
 
         <Card className="space-y-4">

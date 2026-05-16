@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ApiError, type AuthResponse, type AuthUser, getCurrentUser } from '@/lib/api/auth';
+import { logoutSession, refreshAccessToken } from '@/lib/api/client';
 import { AUTH_STORAGE_KEY } from '@/store/auth/storage';
 
 type AuthContextValue = {
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const logout = useCallback(() => {
+  const clearLocalSession = useCallback(() => {
     setToken(null);
     setUser(null);
     setAuthError(null);
@@ -32,58 +33,113 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const logout = useCallback(() => {
+    void logoutSession();
+    clearLocalSession();
+  }, [clearLocalSession]);
+
+  const applyAccessToken = useCallback((accessToken: string) => {
+    setToken(accessToken);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(AUTH_STORAGE_KEY, accessToken);
+    }
+  }, []);
+
   const refreshUser = useCallback(async () => {
-    if (!token) {
+    let activeToken = token;
+    if (!activeToken) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        applyAccessToken(refreshed);
+        activeToken = refreshed;
+      }
+    }
+    if (!activeToken) {
       setUser(null);
       return;
     }
     try {
-      const currentUser = await getCurrentUser(token);
+      const currentUser = await getCurrentUser(activeToken);
       setUser(currentUser);
       setAuthError(null);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
-        logout();
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          applyAccessToken(refreshed);
+          try {
+            const currentUser = await getCurrentUser(refreshed);
+            setUser(currentUser);
+            setAuthError(null);
+            return;
+          } catch {
+            // fall through
+          }
+        }
+        clearLocalSession();
         return;
       }
       setAuthError(error instanceof Error ? error.message : 'Unable to load user profile');
     }
-  }, [logout, token]);
+  }, [applyAccessToken, clearLocalSession, token]);
 
-  const setSession = useCallback((session: AuthResponse) => {
-    setToken(session.accessToken);
-    setUser(session.user);
-    setAuthError(null);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, session.accessToken);
-    }
-  }, []);
+  const setSession = useCallback(
+    (session: AuthResponse) => {
+      applyAccessToken(session.accessToken);
+      setUser(session.user);
+      setAuthError(null);
+    },
+    [applyAccessToken],
+  );
 
   useEffect(() => {
-    // Restore session once on client boot; token persistence is temporary MVP strategy.
     if (typeof window === 'undefined') return;
-    const storedToken = window.localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!storedToken) {
-      setIsLoading(false);
-      return;
-    }
 
-    setToken(storedToken);
-    getCurrentUser(storedToken)
-      .then((currentUser) => {
+    const restore = async () => {
+      const storedToken = window.localStorage.getItem(AUTH_STORAGE_KEY);
+      let accessToken = storedToken;
+
+      if (!accessToken) {
+        accessToken = await refreshAccessToken();
+      }
+
+      if (!accessToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      applyAccessToken(accessToken);
+      try {
+        const currentUser = await getCurrentUser(accessToken);
         setUser(currentUser);
         setAuthError(null);
-      })
-      .catch((error) => {
+      } catch (error) {
         if (error instanceof ApiError && error.status === 401) {
-          window.localStorage.removeItem(AUTH_STORAGE_KEY);
+          const refreshed = await refreshAccessToken();
+          if (refreshed) {
+            applyAccessToken(refreshed);
+            try {
+              const currentUser = await getCurrentUser(refreshed);
+              setUser(currentUser);
+              setAuthError(null);
+              setIsLoading(false);
+              return;
+            } catch {
+              // fall through
+            }
+          }
         }
-        setAuthError(error instanceof Error ? error.message : 'Unable to restore session');
-        setToken(null);
-        setUser(null);
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+        clearLocalSession();
+        if (!(error instanceof ApiError && error.status === 401)) {
+          setAuthError(error instanceof Error ? error.message : 'Unable to restore session');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void restore();
+  }, [applyAccessToken, clearLocalSession]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type KycStatusResponse = {
   status: 'NOT_STARTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -18,25 +16,32 @@ export type KycStatusResponse = {
   } | null;
 };
 
-async function parseResponse<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as T;
+export async function getKycStatus(token: string) {
+  return apiJson<KycStatusResponse>('/kyc/me', { token, cache: 'no-store' });
 }
 
-export async function getKycStatus(token: string) {
-  const res = await fetch(`${API_BASE_URL}/kyc/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: 'include',
-    cache: 'no-store',
+export type AdminKycRow = {
+  id: string;
+  userId: string;
+  status: string;
+  panNumberMasked: string | null;
+  panHolderName: string | null;
+  bankAccountLast4: string | null;
+  bankIfsc: string | null;
+  createdAt: string;
+  user: { id: string; email: string; firstName: string | null; lastName: string | null };
+};
+
+export async function listPendingKyc(token: string) {
+  return apiJson<AdminKycRow[]>('/kyc/admin/pending', { token, cache: 'no-store' });
+}
+
+export async function reviewKyc(token: string, id: string, payload: { approve: boolean; adminNotes?: string }) {
+  return apiJson<unknown>(`/kyc/admin/${id}`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload),
   });
-  return parseResponse<KycStatusResponse>(res);
 }
 
 export async function submitKyc(
@@ -49,14 +54,9 @@ export async function submitKyc(
     bankAccountHolder: string;
   },
 ) {
-  const res = await fetch(`${API_BASE_URL}/kyc/submit`, {
+  return apiJson<unknown>('/kyc/submit', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
-    credentials: 'include',
   });
-  return parseResponse<unknown>(res);
 }

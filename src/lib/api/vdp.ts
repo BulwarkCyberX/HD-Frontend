@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type VdpPublic = {
   id: string;
@@ -11,39 +9,15 @@ export type VdpPublic = {
 };
 
 export async function getVdpPublic(id: string) {
-  const res = await fetch(`${API_BASE_URL}/vdp/${id}`, { cache: 'no-store' });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as VdpPublic;
+  return apiJson<VdpPublic>(`/vdp/${id}`, { cache: 'no-store', retryOnUnauthorized: false });
 }
 
-export async function createVdp(
-  token: string,
-  payload: { title: string; scope: unknown; policy: string },
-) {
-  const res = await fetch(`${API_BASE_URL}/vdp`, {
+export async function createVdp(token: string, payload: { title: string; scope: unknown; policy: string }) {
+  return apiJson<VdpPublic & { clientId?: string }>('/vdp', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as VdpPublic & { clientId?: string };
 }
 
 export async function submitVdpReport(payload: {
@@ -53,20 +27,7 @@ export async function submitVdpReport(payload: {
   contactEmail?: string;
   severity?: string;
 }) {
-  const res = await fetch(`${API_BASE_URL}/vdp/report`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as {
+  return apiJson<{
     id: string;
     vdpId: string;
     title: string;
@@ -74,5 +35,9 @@ export async function submitVdpReport(payload: {
     contactEmail: string | null;
     severity: string | null;
     createdAt: string;
-  };
+  }>('/vdp/report', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    retryOnUnauthorized: false,
+  });
 }

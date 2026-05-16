@@ -26,7 +26,12 @@ Primary routes:
 - `/dashboard/projects/create`: scope builder and project creation form
 - `/dashboard/projects/[id]`: secure project workspace (chat, reports, **milestones** tab with funding / lifecycle actions, wallet summary, realtime refresh)
 - `/dashboard/withdrawals`: withdrawal request history (providers; role-aware empty states)
+- `/dashboard/admin`: admin hub (projects, email templates, KYC, disputes, reports)
+- `/dashboard/admin/projects`, `/dashboard/admin/projects/[id]`: manage all projects
+- `/dashboard/admin/emails`, `/dashboard/admin/emails/[key]`: edit transactional email templates
+- `/dashboard/admin/settings`: platform settings (links to template editor + env notes)
 - `/dashboard/admin/reports`: admin triage queue and report validation actions
+- `/dashboard/admin/kyc`, `/dashboard/admin/disputes`: verification and dispute queues
 - `/dashboard/bids`: provider bid history view
 - `/dashboard/bounty`: private bug bounty programs (create + list)
 - `/dashboard/bounty/[id]`: program detail, submissions, researcher upload flow
@@ -193,7 +198,10 @@ From repo root:
 npm run dev --workspace @hackersdeal/web
 npm run build --workspace @hackersdeal/web
 npm run lint --workspace @hackersdeal/web
+npm run test:e2e --workspace @hackersdeal/web
 ```
+
+E2E uses Playwright (`apps/web/e2e/`). Start API + web (or let Playwright start web), seed DB, then run tests. See `docs/overnight-handoff.md`.
 
 ## Required Env Vars
 

@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type CheckoutSession = {
   sessionId: string;
@@ -28,18 +26,6 @@ export type PaymentTransaction = {
   payment: { id: string; status: string } | null;
 };
 
-async function parseResponse<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as T;
-}
-
 export async function createCheckout(
   token: string,
   payload: {
@@ -49,16 +35,11 @@ export async function createCheckout(
     idempotencyKey?: string;
   },
 ) {
-  const res = await fetch(`${API_BASE_URL}/payments/checkout/create`, {
+  return apiJson<CheckoutSession>('/payments/checkout/create', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
-    credentials: 'include',
   });
-  return parseResponse<CheckoutSession>(res);
 }
 
 export async function verifyCheckout(
@@ -70,23 +51,13 @@ export async function verifyCheckout(
     signature: string;
   },
 ) {
-  const res = await fetch(`${API_BASE_URL}/payments/checkout/verify`, {
+  return apiJson<unknown>('/payments/checkout/verify', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
-    credentials: 'include',
   });
-  return parseResponse<unknown>(res);
 }
 
 export async function getMyTransactions(token: string) {
-  const res = await fetch(`${API_BASE_URL}/payments/transactions/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: 'include',
-    cache: 'no-store',
-  });
-  return parseResponse<PaymentTransaction[]>(res);
+  return apiJson<PaymentTransaction[]>('/payments/transactions/me', { token, cache: 'no-store' });
 }

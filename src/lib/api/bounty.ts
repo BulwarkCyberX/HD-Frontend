@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type BountyProgram = {
   id: string;
@@ -44,94 +42,34 @@ export async function createBountyProgram(
     allowedResearcherIds?: string[];
   },
 ) {
-  const res = await fetch(`${API_BASE_URL}/bounty/programs`, {
+  return apiJson<BountyProgram>('/bounty/programs', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyProgram;
 }
 
 export async function listBountyPrograms(token: string) {
-  const res = await fetch(`${API_BASE_URL}/bounty/programs`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyProgram[];
+  return apiJson<BountyProgram[]>('/bounty/programs', { token, cache: 'no-store' });
 }
 
 export async function getBountyProgram(token: string, id: string) {
-  const res = await fetch(`${API_BASE_URL}/bounty/programs/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyProgram;
+  return apiJson<BountyProgram>(`/bounty/programs/${id}`, { token, cache: 'no-store' });
 }
 
 export async function submitBountyReport(
   token: string,
   payload: { programId: string; title: string; description: string; severity: string },
 ) {
-  const res = await fetch(`${API_BASE_URL}/bounty/reports`, {
+  return apiJson<BountyBugReport>('/bounty/reports', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify(payload),
   });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyBugReport;
 }
 
 export async function listBountyReports(token: string, programId: string) {
-  const res = await fetch(`${API_BASE_URL}/bounty/reports/${programId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyBugReport[];
+  return apiJson<BountyBugReport[]>(`/bounty/reports/${programId}`, { token, cache: 'no-store' });
 }
 
 export async function updateBountyReportStatus(
@@ -139,21 +77,9 @@ export async function updateBountyReportStatus(
   reportId: string,
   status: 'VALID' | 'REJECTED' | 'DUPLICATE',
 ) {
-  const res = await fetch(`${API_BASE_URL}/bounty/reports/${reportId}/status`, {
+  return apiJson<BountyBugReport>(`/bounty/reports/${reportId}/status`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    token,
     body: JSON.stringify({ status }),
   });
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as BountyBugReport;
 }

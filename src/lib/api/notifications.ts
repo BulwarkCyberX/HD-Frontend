@@ -1,6 +1,5 @@
 import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type NotificationItem = {
   id: string;
@@ -13,19 +12,7 @@ export type NotificationItem = {
 
 export async function listNotifications(token: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/notifications`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
-    const json = (await res.json()) as unknown;
-    if (!res.ok) {
-      const message =
-        typeof json === 'object' && json && 'message' in json
-          ? String((json as { message: string | string[] }).message)
-          : `Request failed with status ${res.status}`;
-      throw new ApiError(res.status, message);
-    }
-    return json as NotificationItem[];
+    return await apiJson<NotificationItem[]>('/notifications', { token, cache: 'no-store' });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to load notifications');
@@ -34,19 +21,7 @@ export async function listNotifications(token: string) {
 
 export async function markNotificationRead(token: string, id: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const json = (await res.json()) as unknown;
-    if (!res.ok) {
-      const message =
-        typeof json === 'object' && json && 'message' in json
-          ? String((json as { message: string | string[] }).message)
-          : `Request failed with status ${res.status}`;
-      throw new ApiError(res.status, message);
-    }
-    return json as NotificationItem;
+    return await apiJson<NotificationItem>(`/notifications/${id}/read`, { method: 'PATCH', token });
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new Error('Unable to update notification');

@@ -37,6 +37,20 @@ export default async function PublicProviderPage({ params }: { params: Promise<{
         <Stat label="Valid reports" value={String(provider.profile.validReportCount)} />
       </section>
 
+      {Array.isArray(provider.profile.portfolio) && provider.profile.portfolio.length > 0 ? (
+        <section>
+          <h2 className="font-semibold text-slate-900">Portfolio</h2>
+          <ul className="mt-2 space-y-2 text-sm text-slate-700">
+            {(provider.profile.portfolio as { title?: string; summary?: string }[]).map((item, i) => (
+              <li key={i} className="rounded-md border border-slate-200 p-3">
+                {item.title ? <p className="font-medium">{item.title}</p> : null}
+                {item.summary ? <p className="text-slate-600">{item.summary}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {provider.profile.skills.length > 0 ? (
         <section>
           <h2 className="font-semibold text-slate-900">Skills</h2>

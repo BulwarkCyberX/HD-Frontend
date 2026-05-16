@@ -30,12 +30,15 @@ export default function HomePage() {
             </div>
           }
           unauthenticated={
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link href="/auth/login">
                 <Button>Login</Button>
               </Link>
               <Link href="/auth/signup">
                 <Button variant="secondary">Signup</Button>
+              </Link>
+              <Link href="/how-it-works">
+                <Button variant="secondary">How it works</Button>
               </Link>
             </div>
           }

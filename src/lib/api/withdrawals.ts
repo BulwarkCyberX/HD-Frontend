@@ -1,6 +1,4 @@
-import { ApiError } from './auth';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+import { apiJson } from './client';
 
 export type WithdrawalRow = {
   id: string;
@@ -14,34 +12,34 @@ export type WithdrawalRow = {
   updatedAt: string;
 };
 
-async function parse<T>(res: Response): Promise<T> {
-  const json = (await res.json()) as unknown;
-  if (!res.ok) {
-    const message =
-      typeof json === 'object' && json && 'message' in json
-        ? String((json as { message: string | string[] }).message)
-        : `Request failed with status ${res.status}`;
-    throw new ApiError(res.status, message);
-  }
-  return json as T;
-}
-
 export async function createWithdrawalRequest(
   token: string,
   payload: { amount: number; currency: 'INR' | 'USD' },
 ) {
-  const res = await fetch(`${API_BASE_URL}/withdrawals`, {
+  return apiJson<WithdrawalRow>('/withdrawals', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    token,
     body: JSON.stringify(payload),
   });
-  return parse<WithdrawalRow>(res);
 }
 
 export async function listMyWithdrawals(token: string) {
-  const res = await fetch(`${API_BASE_URL}/withdrawals/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  return parse<WithdrawalRow[]>(res);
+  return apiJson<WithdrawalRow[]>('/withdrawals/me', { token, cache: 'no-store' });
 }
+
+export type AdminWithdrawalRow = WithdrawalRow & {
+  user: { id: string; email: string; firstName: string | null; lastName: string | null };
+};
+
+export async function listPendingWithdrawals(token: string) {
+  return apiJson<AdminWithdrawalRow[]>('/withdrawals/admin/pending', { token, cache: 'no-store' });
+}
+
+export async function approveWithdrawal(token: string, id: string) {
+  return apiJson<WithdrawalRow>(`/withdrawals/admin/${id}/approve`, { method: 'PATCH', token });
+}
+
+export async function rejectWithdrawal(token: string, id: string) {
+  return apiJson<WithdrawalRow>(`/withdrawals/admin/${id}/reject`, { method: 'PATCH', token });
+}
+

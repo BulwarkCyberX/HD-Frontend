@@ -12,13 +12,24 @@ export type AuthUser = {
     completedProjects: number;
     validReportCount: number;
     reputationScore: number;
+    bio?: string;
+    portfolio?: unknown;
+    availabilityStatus?: string;
+    skills?: string[];
+    certifications?: string[];
   } | null;
   clientProfile?: {
     id: string;
     userId: string;
     companySize: string | null;
+    rating?: number;
+    totalReviews?: number;
     createdAt: string;
   } | null;
+  settings?: {
+    emailDigestWeekly: boolean;
+    lastEmailDigestAt: string | null;
+  };
 };
 
 export type AuthResponse = {
@@ -106,6 +117,7 @@ export async function login(payload: LoginPayload) {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<AuthResponse>(res);
@@ -120,6 +132,7 @@ export async function requestLoginCode(payload: RequestLoginCodePayload) {
     const res = await fetch(`${API_BASE_URL}/auth/login/code/request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<{ ok: true }>(res);
@@ -134,6 +147,7 @@ export async function verifyLoginCode(payload: VerifyLoginCodePayload) {
     const res = await fetch(`${API_BASE_URL}/auth/login/code/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<AuthResponse>(res);
@@ -148,6 +162,7 @@ export async function register(payload: RegisterPayload) {
     const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<RegisterResult>(res);
@@ -162,6 +177,7 @@ export async function verifyEmailOtp(payload: { email: string; code: string }) {
     const res = await fetch(`${API_BASE_URL}/auth/verify-email/otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<{ verified: true }>(res);
@@ -176,6 +192,7 @@ export async function verifyEmailToken(payload: { token: string }) {
     const res = await fetch(`${API_BASE_URL}/auth/verify-email/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(payload),
     });
     return await parseResponse<{ verified: true }>(res);
@@ -190,6 +207,7 @@ export async function resendVerificationEmail(email: string) {
     const res = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email }),
     });
     return await parseResponse<{ ok: true }>(res);
@@ -204,6 +222,7 @@ export async function forgotPassword(email: string) {
     const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email }),
     });
     return await parseResponse<{ ok: true }>(res);
@@ -243,6 +262,8 @@ export async function getCurrentUser(token: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/users/me`, {
       headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+      cache: 'no-store',
     });
     return await parseResponse<AuthUser>(res);
   } catch (error) {
@@ -255,6 +276,7 @@ export async function getProviderProfile(token: string, providerId: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/users/provider/${providerId}`, {
       headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
       cache: 'no-store',
     });
     return await parseResponse<AuthUser>(res);

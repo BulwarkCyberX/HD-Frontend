@@ -4,12 +4,15 @@ import { useAuth } from '@/hooks/auth-context';
 export function MarketingHeader() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  const publicLinks = [
+    { href: '/how-it-works', label: 'How it works' },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/trust', label: 'Trust' },
+    { href: '/marketplace', label: 'Marketplace' },
+  ];
   const links = isAuthenticated
-    ? [{ href: '/dashboard', label: 'Dashboard' }]
-    : [
-        { href: '/login', label: 'Log in' },
-        { href: '/signup', label: 'Sign up' },
-      ];
+    ? [...publicLinks, { href: '/dashboard', label: 'Dashboard' }]
+    : [...publicLinks, { href: '/login', label: 'Log in' }, { href: '/signup', label: 'Sign up' }];
 
   return (
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur">

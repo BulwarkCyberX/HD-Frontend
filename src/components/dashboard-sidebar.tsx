@@ -11,10 +11,12 @@ const baseItems = [
   { href: '/dashboard/projects/create', label: 'Create Project', match: 'exact' as const },
   { href: '/dashboard/bids', label: 'My Bids', match: 'prefix' as const },
   { href: '/dashboard/withdrawals', label: 'Withdrawals', match: 'prefix' as const },
+  { href: '/dashboard/organization', label: 'Organization', match: 'prefix' as const },
   { href: '/dashboard/bounty', label: 'Bug Bounty', match: 'prefix' as const },
   { href: '/dashboard/vdp', label: 'VDP', match: 'prefix' as const },
   { href: '/dashboard/profile', label: 'Profile', match: 'prefix' as const },
   { href: '/dashboard/settings', label: 'Settings', match: 'prefix' as const },
+  { href: '/dashboard/integrations', label: 'Integrations', match: 'prefix' as const },
 ];
 
 type DashboardSidebarProps = {
@@ -28,13 +30,9 @@ export function DashboardSidebar({ mobileOpen = false, onMobileClose }: Dashboar
   const pathname = usePathname();
   const { user } = useAuth();
   const items = [
-    ...baseItems,
+    ...baseItems.filter((item) => item.href !== '/dashboard/organization' || user?.role === 'CLIENT'),
     ...(user?.role === 'ADMIN'
-      ? [
-          { href: '/dashboard/admin/reports', label: 'Admin Reports', match: 'prefix' as const },
-          { href: '/dashboard/admin/kyc', label: 'KYC Queue', match: 'prefix' as const },
-          { href: '/dashboard/admin/disputes', label: 'Disputes', match: 'prefix' as const },
-        ]
+      ? [{ href: '/dashboard/admin', label: 'Admin panel', match: 'prefix' as const }]
       : []),
   ];
 

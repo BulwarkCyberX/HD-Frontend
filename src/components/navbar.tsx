@@ -8,15 +8,19 @@ import { useAuth } from '@/hooks/auth-context';
 export function Navbar() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  const publicLinks = [
+    { href: '/how-it-works', label: 'How it works' },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/trust', label: 'Trust' },
+    { href: '/marketplace', label: 'Marketplace' },
+  ];
   const links = isAuthenticated
     ? [
+        ...publicLinks,
         { href: '/dashboard', label: 'Dashboard' },
         { href: '/projects', label: 'Projects' },
       ]
-    : [
-        { href: '/auth/login', label: 'Login' },
-        { href: '/auth/signup', label: 'Signup' },
-      ];
+    : [...publicLinks, { href: '/auth/login', label: 'Login' }, { href: '/auth/signup', label: 'Signup' }];
 
   return (
     <header className="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70">
