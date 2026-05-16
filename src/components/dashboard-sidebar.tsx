@@ -10,6 +10,7 @@ const baseItems = [
   { href: '/projects', label: 'Projects', match: 'prefix' as const },
   { href: '/dashboard/projects/create', label: 'Create Project', match: 'exact' as const },
   { href: '/dashboard/bids', label: 'My Bids', match: 'prefix' as const },
+  { href: '/dashboard/withdrawals', label: 'Withdrawals', match: 'prefix' as const },
   { href: '/dashboard/bounty', label: 'Bug Bounty', match: 'prefix' as const },
   { href: '/dashboard/vdp', label: 'VDP', match: 'prefix' as const },
   { href: '/dashboard/profile', label: 'Profile', match: 'prefix' as const },

@@ -5,13 +5,15 @@ Next.js App Router application for the HackersDeal frontend.
 ## Frontend Architecture
 
 - Framework: Next.js (App Router)
-- Styling: Tailwind CSS
+- Styling: Tailwind CSS; brand colors live under **`tropical.*`** in `tailwind.config.ts` (generated shades from aqua, jade, sage, sand, sunrise bases)
 - Forms: `react-hook-form` + `zod`
-- UI: shared components from `@hackersdeal/ui`
-- Data/API layer: `src/lib/api/*` (auth, projects, bids, messages, reports, payments, reviews, notifications, bounty, files, ai, vdp)
+- UI: `@hackersdeal/ui` is wired to **`local-ui/`** in this app (`file:./local-ui` in `package.json`). Primitives include `Button`, `Input`, `Textarea`, `Card` (default **light** tropical surface; pass **`surface="dark"`** for auth/landing glass cards), and `Badge`.
+- Data/API layer: `src/lib/api/*` (auth, projects, bids, messages, reports, payments, reviews, notifications, bounty, files, ai, vdp, **milestones**, **wallets**, **withdrawals**)
+- Server state: **TanStack Query** (`@tanstack/react-query`) via `src/providers/query-provider.tsx`, mounted in `src/app/layout.tsx` (workspace polling + cache invalidation from sockets)
 - Payment API layer: `src/lib/api/payments.ts`
 - Review API layer: `src/lib/api/reviews.ts`
 - Auth state: React Context in `src/hooks/auth-context.tsx` with localStorage-backed token
+- Realtime: **Socket.IO client** (`socket.io-client`) in `src/hooks/use-project-socket.ts` — connects to `${NEXT_PUBLIC_API_URL}/workspace`, joins the project room, and triggers workspace refresh on domain events; **existing HTTP polling remains** when the socket is disconnected
 
 ## Routing Structure
 
@@ -20,9 +22,10 @@ Primary routes:
 - `/`: landing page with CTA
 - `/auth/login`: login form (real backend login call)
 - `/auth/signup`: signup form (real backend register call)
-- `/dashboard`: dashboard shell
+- `/dashboard`: authenticated dashboard (same **workspace shell** as `/projects`: sidebar + light content panel)
 - `/dashboard/projects/create`: scope builder and project creation form
-- `/dashboard/projects/[id]`: secure project workspace (chat + reports)
+- `/dashboard/projects/[id]`: secure project workspace (chat, reports, **milestones** tab with funding / lifecycle actions, wallet summary, realtime refresh)
+- `/dashboard/withdrawals`: withdrawal request history (providers; role-aware empty states)
 - `/dashboard/admin/reports`: admin triage queue and report validation actions
 - `/dashboard/bids`: provider bid history view
 - `/dashboard/bounty`: private bug bounty programs (create + list)
@@ -30,9 +33,8 @@ Primary routes:
 - `/dashboard/vdp`: client-only VDP publisher (public link generation)
 - `/vdp/[id]`: public vulnerability disclosure + reporting form
 - `/dashboard/profile`: profile + provider reputation metrics
-- `/projects`: projects list from backend API
-- `/projects/[id]`: project detail + bid management for client owner
-- `/projects/[id]`: project detail + bid management + provider profile metrics
+- `/projects`: projects list from backend API (public; uses workspace layout **without** forcing login)
+- `/projects/[id]`: project detail, bid management for client owner, provider metrics when applicable
 - `/projects/[id]/bid`: provider bid submission
 
 Compatibility redirects:
@@ -42,10 +44,13 @@ Compatibility redirects:
 
 ## Component Structure
 
+- `src/app/manifest.ts`: PWA web app manifest (icons can be filled in for production)
+- `src/app/dashboard/error.tsx`: route-level error boundary for the dashboard segment
 - `src/components/navbar.tsx`: top-level navigation + notification bell (polling)
 - `src/components/notification-bell.tsx`: notification dropdown
 - `src/components/file-attachment-control.tsx`: reusable authenticated upload control
-- `src/components/dashboard-sidebar.tsx`: dashboard nav shell
+- `src/components/workspace-layout.tsx`: shared shell for `/dashboard/*` and `/projects/*` (sidebar + main content panel; `contentVariant` `card` vs `flush` only affects padding semantics—both use the same light panel styling)
+- `src/components/dashboard-sidebar.tsx`: workspace nav links; **desktop** rail from `md` and up, **mobile drawer** (Menu in the workspace header) below `md`
 - `src/components/protected-route.tsx`: auth guard wrapper
 - `src/components/auth-login-form.tsx`: validated login + backend auth call
 - `src/components/auth-signup-form.tsx`: validated signup + backend register call
@@ -58,13 +63,14 @@ Compatibility redirects:
 
 ## State Management Approach
 
-- Current approach: React Context provider (`AuthProvider`)
+- Current approach: React Context provider (`AuthProvider`) for session identity
 - Stored state:
   - `isAuthenticated`
   - `user`
   - `token`
 - Token strategy (MVP): memory + `localStorage`
 - Route protection: `ProtectedRoute` redirects unauthenticated users to `/auth/login`
+- Remote data: prefer **TanStack Query** for fetches that benefit from caching, deduping, and explicit refetch (project workspace milestones, wallet, etc.)
 
 ## Real Auth Flow (MVP)
 
@@ -119,7 +125,7 @@ Layout:
 Access policy in UI:
 
 - workspace visible only for project owner client and selected provider
-- chat/reports are polled on interval (basic real-time behavior)
+- chat/reports/milestones/wallet are polled on an interval; when the Socket.IO connection is up, the server can push refresh hints so the UI refetches without waiting for the next poll
 
 ## Payment Flow UI (Escrow MVP)
 
@@ -131,11 +137,19 @@ Payment actions are integrated into `/dashboard/projects/[id]`:
 4. Client owner releases payment (`Release Payment`) after completion.
 5. Selected provider sees payment status updates and release confirmation message.
 
+The backend still exposes the same payment routes for compatibility; deposits and releases are **orchestrated through wallets and an immutable ledger** (`WalletLedgerEntry`). The workspace may show a **wallet summary** (balances) via `GET /wallets/me`.
+
 API calls used by workspace UI:
 
 - `POST /payments/deposit`
 - `PATCH /projects/:id/complete`
 - `POST /payments/release`
+- `GET /wallets/me` (authenticated user wallet)
+- Milestones: `GET /milestones/project/:projectId`, `POST /milestones`, state transitions under `POST /milestones/:id/*` (fund, start, submit, approve, release, reject), comments under `GET|POST /milestones/:id/comments` (see `docs/api.md` for payloads)
+
+Withdrawals (typically providers):
+
+- `POST /withdrawals`, `GET /withdrawals/me` — UI at `/dashboard/withdrawals`
 
 ## Trust and Triage UI (MVP)
 
@@ -183,4 +197,7 @@ npm run lint --workspace @hackersdeal/web
 
 ## Required Env Vars
 
-- `NEXT_PUBLIC_API_URL` (optional, defaults to `http://localhost:4000`)
+- `NEXT_PUBLIC_API_URL` — browser-facing NestJS origin (default `http://localhost:4000`). Used for REST **and** for the Socket.IO path `${NEXT_PUBLIC_API_URL}/workspace` (same host as the API; ensure CORS and cookie rules match your deployment).
+- `NEXT_PUBLIC_APP_URL` — public site origin (e.g. `http://localhost:3000`); useful for OAuth return URLs and absolute links where configured (see `.env.example`).
+
+For full API and architecture notes (disputes, search, storage presign, health, Swagger, etc.), see repo **`docs/api.md`** and **`docs/architecture.md`**.

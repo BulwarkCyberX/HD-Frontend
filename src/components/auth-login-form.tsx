@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Card, Input } from '@hackersdeal/ui';
+import { OAuthButtons } from '@/components/oauth-buttons';
 import { ApiError, login, requestLoginCode, verifyLoginCode } from '@/lib/api/auth';
 import { useAuth } from '@/hooks/auth-context';
 
@@ -34,7 +35,6 @@ export function AuthLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get('next') || '/dashboard';
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
   useEffect(() => {
     if (searchParams.get('verified') === '1') {
@@ -215,53 +215,7 @@ export function AuthLoginForm() {
       )}
 
       <div className="mt-6">
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-neutral-800" />
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">Or continue with</p>
-          <div className="h-px flex-1 bg-neutral-800" />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full justify-center"
-            onClick={() => {
-              window.location.href = `${apiBase}/auth/oauth/microsoft?next=${encodeURIComponent(nextPath)}`;
-            }}
-          >
-            Microsoft
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full justify-center"
-            onClick={() => {
-              window.location.href = `${apiBase}/auth/oauth/google?next=${encodeURIComponent(nextPath)}`;
-            }}
-          >
-            Google
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full justify-center"
-            onClick={() => {
-              window.location.href = `${apiBase}/auth/oauth/facebook?next=${encodeURIComponent(nextPath)}`;
-            }}
-          >
-            Facebook
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full justify-center"
-            onClick={() => {
-              window.location.href = `${apiBase}/auth/oauth/linkedin?next=${encodeURIComponent(nextPath)}`;
-            }}
-          >
-            LinkedIn
-          </Button>
-        </div>
+        <OAuthButtons nextPath={nextPath} />
       </div>
 
       {serverMessage ? <p className="mt-4 text-sm text-emerald-300">{serverMessage}</p> : null}

@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Card, Input } from '@hackersdeal/ui';
+import { OAuthButtons } from '@/components/oauth-buttons';
 import { ApiError, checkEmailAvailability, register as registerApi, type AuthResponse } from '@/lib/api/auth';
 import { useAuth } from '@/hooks/auth-context';
 
@@ -312,6 +313,10 @@ export function AuthSignupForm() {
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
+
+      <div className="mt-6">
+        <OAuthButtons nextPath="/dashboard" />
+      </div>
 
       {serverMessage ? <p className="mt-4 text-sm text-emerald-300">{serverMessage}</p> : null}
       {serverError ? <p className="mt-4 text-sm text-rose-400">{serverError}</p> : null}

@@ -11,10 +11,12 @@
   "dependencies": {
     "@hackersdeal/ui": "file:./local-ui",
     "@hookform/resolvers": "^5.2.2",
+    "@tanstack/react-query": "^5.100.9",
     "next": "^15.3.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.75.0",
+    "socket.io-client": "^4.8.3",
     "zod": "^4.4.2"
   },
   "devDependencies": {

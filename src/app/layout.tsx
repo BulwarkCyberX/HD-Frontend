@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { AuthProvider } from '@/hooks/auth-context';
+import { QueryProvider } from '@/providers/query-provider';
 
 const inter = Inter({
   variable: '--font-sans',
@@ -27,8 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
         <AuthProvider>
-          <Navbar />
-          {children}
+          <QueryProvider>
+            <Navbar />
+            {children}
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

@@ -15,8 +15,263 @@ import { getProjectById, type ProjectItem } from '@/lib/api/projects';
 import { createReport, getReports, type WorkspaceReport } from '@/lib/api/reports';
 import { createReview } from '@/lib/api/reviews';
 import { getReportStatusTone } from '@/lib/reports/status';
+import {
+  approveMilestone,
+  createMilestone,
+  fundMilestone,
+  listMilestoneComments,
+  listMilestones,
+  rejectMilestone,
+  releaseMilestone,
+  startMilestone,
+  submitMilestone,
+  addMilestoneComment,
+  type MilestoneRow,
+} from '@/lib/api/milestones';
+import { getWalletMe, type WalletSummary } from '@/lib/api/wallets';
+import { useProjectSocket } from '@/hooks/use-project-socket';
 
-type WorkspaceTab = 'chat' | 'reports';
+type WorkspaceTab = 'chat' | 'reports' | 'milestones';
+
+type MilestonesPanelProps = {
+  token: string;
+  projectId: string;
+  milestones: MilestoneRow[];
+  isProjectOwner: boolean;
+  isSelectedProvider: boolean;
+  paymentInEscrow: boolean;
+  milestoneTitle: string;
+  setMilestoneTitle: (v: string) => void;
+  milestoneAmount: number;
+  setMilestoneAmount: (v: number) => void;
+  milestoneCurrency: 'INR' | 'USD';
+  setMilestoneCurrency: (v: 'INR' | 'USD') => void;
+  milestoneBusyId: string | null;
+  setMilestoneBusyId: (v: string | null) => void;
+  onRefresh: () => void;
+  setActionMessage: (v: string) => void;
+  setErrorMessage: (v: string) => void;
+};
+
+function MilestonesPanel({
+  token,
+  projectId,
+  milestones,
+  isProjectOwner,
+  isSelectedProvider,
+  paymentInEscrow,
+  milestoneTitle,
+  setMilestoneTitle,
+  milestoneAmount,
+  setMilestoneAmount,
+  milestoneCurrency,
+  setMilestoneCurrency,
+  milestoneBusyId,
+  setMilestoneBusyId,
+  onRefresh,
+  setActionMessage,
+  setErrorMessage,
+}: MilestonesPanelProps) {
+  const run = async (id: string, fn: () => Promise<unknown>) => {
+    setMilestoneBusyId(id);
+    setErrorMessage('');
+    try {
+      await fn();
+      setActionMessage('Updated.');
+      onRefresh();
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Action failed');
+    } finally {
+      setMilestoneBusyId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4 text-sm">
+      <p className="text-xs text-slate-600">
+        Milestones allocate from project escrow. Real-time updates use WebSockets with 8s polling fallback.
+      </p>
+      {isProjectOwner && paymentInEscrow ? (
+        <div className="space-y-2 rounded-md border border-slate-200 p-3">
+          <p className="text-sm font-semibold text-slate-900">New milestone</p>
+          <input
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Title"
+            value={milestoneTitle}
+            onChange={(e) => setMilestoneTitle(e.target.value)}
+          />
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="number"
+              min={1}
+              className="w-32 rounded-md border border-slate-300 px-3 py-2 text-sm"
+              value={milestoneAmount}
+              onChange={(e) => setMilestoneAmount(Number(e.target.value))}
+            />
+            <select
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              value={milestoneCurrency}
+              onChange={(e) => setMilestoneCurrency(e.target.value as 'INR' | 'USD')}
+            >
+              <option value="INR">INR</option>
+              <option value="USD">USD</option>
+            </select>
+            <Button
+              type="button"
+              disabled={!milestoneTitle.trim() || milestoneBusyId === 'new'}
+              onClick={() =>
+                run('new', async () => {
+                  await createMilestone(token, {
+                    projectId,
+                    title: milestoneTitle.trim(),
+                    amount: milestoneAmount,
+                    currency: milestoneCurrency,
+                  });
+                  setMilestoneTitle('');
+                })
+              }
+            >
+              {milestoneBusyId === 'new' ? 'Creating...' : 'Create'}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="space-y-2">
+        {milestones.length === 0 ? (
+          <p className="text-sm text-slate-500">No milestones yet.</p>
+        ) : (
+          milestones.map((m) => (
+            <div key={m.id} className="space-y-2 rounded-md border border-slate-200 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-medium text-slate-900">{m.title}</p>
+                <Badge>{m.status}</Badge>
+              </div>
+              <p className="text-xs text-slate-600">
+                {m.amount} {m.currency}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {isProjectOwner && m.status === 'PENDING' && paymentInEscrow ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={milestoneBusyId === m.id}
+                    onClick={() => run(m.id, () => fundMilestone(token, m.id))}
+                  >
+                    Fund
+                  </Button>
+                ) : null}
+                {isSelectedProvider && m.status === 'FUNDED' ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={milestoneBusyId === m.id}
+                    onClick={() => run(m.id, () => startMilestone(token, m.id))}
+                  >
+                    Start work
+                  </Button>
+                ) : null}
+                {isSelectedProvider && (m.status === 'FUNDED' || m.status === 'IN_PROGRESS') ? (
+                  <Button
+                    type="button"
+                    disabled={milestoneBusyId === m.id}
+                    onClick={() => run(m.id, () => submitMilestone(token, m.id))}
+                  >
+                    Submit
+                  </Button>
+                ) : null}
+                {isProjectOwner && m.status === 'SUBMITTED' ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={milestoneBusyId === m.id}
+                      onClick={() => run(m.id, () => approveMilestone(token, m.id, 100))}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={milestoneBusyId === m.id}
+                      onClick={() => run(m.id, () => rejectMilestone(token, m.id))}
+                    >
+                      Reject
+                    </Button>
+                  </>
+                ) : null}
+                {isProjectOwner && m.status === 'APPROVED' ? (
+                  <Button
+                    type="button"
+                    disabled={milestoneBusyId === m.id}
+                    onClick={() => run(m.id, () => releaseMilestone(token, m.id))}
+                  >
+                    Release funds
+                  </Button>
+                ) : null}
+              </div>
+              <MilestoneDiscussion token={token} milestoneId={m.id} />
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MilestoneDiscussion({ token, milestoneId }: { token: string; milestoneId: string }) {
+  const [items, setItems] = useState<{ id: string; body: string; createdAt: string; author: { email: string } }[]>(
+    [],
+  );
+  const [body, setBody] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    const rows = await listMilestoneComments(token, milestoneId);
+    setItems(rows);
+  }, [token, milestoneId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return (
+    <div className="mt-2 rounded-md bg-slate-50 p-2">
+      <p className="mb-1 text-xs font-medium text-slate-700">Discussion</p>
+      <ul className="mb-2 max-h-28 space-y-1 overflow-y-auto text-xs text-slate-600">
+        {items.map((c) => (
+          <li key={c.id}>
+            <span className="text-slate-500">{c.author.email}:</span> {c.body}
+          </li>
+        ))}
+      </ul>
+      <div className="flex gap-2">
+        <input
+          className="flex-1 rounded border border-slate-300 px-2 py-1 text-xs"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Comment"
+        />
+        <Button
+          type="button"
+          disabled={loading || !body.trim()}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              await addMilestoneComment(token, milestoneId, body.trim());
+              setBody('');
+              await load();
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {loading ? '...' : 'Post'}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function ProjectWorkspacePage() {
   const params = useParams<{ id: string }>();
@@ -47,6 +302,12 @@ export default function ProjectWorkspacePage() {
   const [attachWorkspaceReportId, setAttachWorkspaceReportId] = useState<string | null>(null);
   const [aiReportHint, setAiReportHint] = useState<string | null>(null);
   const [aiReviewBusy, setAiReviewBusy] = useState(false);
+  const [milestones, setMilestones] = useState<MilestoneRow[]>([]);
+  const [walletSummary, setWalletSummary] = useState<WalletSummary | null>(null);
+  const [milestoneTitle, setMilestoneTitle] = useState('');
+  const [milestoneAmount, setMilestoneAmount] = useState(500);
+  const [milestoneCurrency, setMilestoneCurrency] = useState<'INR' | 'USD'>('INR');
+  const [milestoneBusyId, setMilestoneBusyId] = useState<string | null>(null);
 
   const isParticipant = useMemo(() => {
     if (!project || !user) return false;
@@ -71,6 +332,8 @@ export default function ProjectWorkspacePage() {
     if (!(user && (projectRow.clientId === user.id || projectRow.selectedProviderId === user.id))) {
       setMessages([]);
       setReports([]);
+      setMilestones([]);
+      setWalletSummary(null);
       return;
     }
 
@@ -80,6 +343,20 @@ export default function ProjectWorkspacePage() {
     ]);
     setMessages(messageRows);
     setReports(reportRows);
+
+    try {
+      const ms = await listMilestones(authToken, projectId);
+      setMilestones(ms);
+    } catch {
+      setMilestones([]);
+    }
+
+    try {
+      const w = await getWalletMe(authToken);
+      setWalletSummary(w);
+    } catch {
+      setWalletSummary(null);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -104,11 +381,19 @@ export default function ProjectWorkspacePage() {
   useEffect(() => {
     if (!token || !isParticipant) return;
     const interval = setInterval(() => {
-      Promise.all([getProjectById(token, params.id), getMessages(token, params.id), getReports(token, params.id)])
-        .then(([projectRow, messageRows, reportRows]) => {
+      Promise.all([
+        getProjectById(token, params.id),
+        getMessages(token, params.id),
+        getReports(token, params.id),
+        listMilestones(token, params.id).catch(() => [] as MilestoneRow[]),
+        getWalletMe(token).catch(() => null as WalletSummary | null),
+      ])
+        .then(([projectRow, messageRows, reportRows, ms, w]) => {
           setProject(projectRow);
           setMessages(messageRows);
           setReports(reportRows);
+          setMilestones(ms);
+          if (w) setWalletSummary(w);
         })
         .catch(() => {
           // Polling errors are intentionally ignored to avoid noisy UX.
@@ -117,6 +402,13 @@ export default function ProjectWorkspacePage() {
 
     return () => clearInterval(interval);
   }, [isParticipant, params.id, token]);
+
+  const refreshWorkspace = useCallback(() => {
+    if (!token) return;
+    void loadWorkspaceData(token, params.id);
+  }, [loadWorkspaceData, params.id, token]);
+
+  useProjectSocket(params.id, token, Boolean(isParticipant && token), refreshWorkspace);
 
   const handleSendMessage = async () => {
     if (!token || !messageInput.trim()) return;
@@ -279,6 +571,13 @@ export default function ProjectWorkspacePage() {
                 <span className="font-medium text-slate-900">Payment:</span>{' '}
                 {project.payment ? `${project.payment.status} (${project.payment.amount} ${project.payment.currency})` : 'Not deposited'}
               </p>
+              {walletSummary && isParticipant ? (
+                <p>
+                  <span className="font-medium text-slate-900">Wallet:</span> available{' '}
+                  {walletSummary.availableBalance} {walletSummary.currency} · escrow {walletSummary.escrowBalance}{' '}
+                  {walletSummary.currency}
+                </p>
+              ) : null}
             </div>
             <div>
               <p className="mb-1 text-sm font-medium text-slate-900">In Scope</p>
@@ -374,6 +673,15 @@ export default function ProjectWorkspacePage() {
                   >
                     Reports
                   </button>
+                  <button
+                    type="button"
+                    className={`rounded-md px-3 py-1.5 text-sm ${
+                      activeTab === 'milestones' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'
+                    }`}
+                    onClick={() => setActiveTab('milestones')}
+                  >
+                    Milestones
+                  </button>
                 </div>
 
                 {activeTab === 'chat' ? (
@@ -427,6 +735,26 @@ export default function ProjectWorkspacePage() {
                       </div>
                     ) : null}
                   </div>
+                ) : activeTab === 'milestones' && token ? (
+                  <MilestonesPanel
+                    token={token}
+                    projectId={params.id}
+                    milestones={milestones}
+                    isProjectOwner={isProjectOwner}
+                    isSelectedProvider={isSelectedProvider}
+                    paymentInEscrow={project.payment?.status === 'IN_ESCROW'}
+                    milestoneTitle={milestoneTitle}
+                    setMilestoneTitle={setMilestoneTitle}
+                    milestoneAmount={milestoneAmount}
+                    setMilestoneAmount={setMilestoneAmount}
+                    milestoneCurrency={milestoneCurrency}
+                    setMilestoneCurrency={setMilestoneCurrency}
+                    milestoneBusyId={milestoneBusyId}
+                    setMilestoneBusyId={setMilestoneBusyId}
+                    onRefresh={refreshWorkspace}
+                    setActionMessage={setActionMessage}
+                    setErrorMessage={setErrorMessage}
+                  />
                 ) : (
                   <div className="space-y-4">
                     {isSelectedProvider ? (

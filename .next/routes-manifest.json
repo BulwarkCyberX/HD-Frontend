@@ -1,1 +1,214 @@
-{"version":3,"caseSensitive":false,"basePath":"","rewrites":{"beforeFiles":[],"afterFiles":[],"fallback":[]},"redirects":[{"source":"/:path+/","destination":"/:path+","permanent":true,"internal":true,"regex":"^(?:\\/((?:[^\\/]+?)(?:\\/(?:[^\\/]+?))*))\\/$"}],"headers":[]}
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/dashboard/bounty/[id]",
+      "regex": "^/dashboard/bounty/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/bounty/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/dashboard/projects/[id]",
+      "regex": "^/dashboard/projects/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/projects/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/projects/[id]",
+      "regex": "^/projects/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/projects/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/projects/[id]/bid",
+      "regex": "^/projects/([^/]+?)/bid(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/projects/(?<nxtPid>[^/]+?)/bid(?:/)?$"
+    },
+    {
+      "page": "/vdp/[id]",
+      "regex": "^/vdp/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/vdp/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/auth/callback",
+      "regex": "^/auth/callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/callback(?:/)?$"
+    },
+    {
+      "page": "/auth/check-inbox",
+      "regex": "^/auth/check\\-inbox(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/check\\-inbox(?:/)?$"
+    },
+    {
+      "page": "/auth/forgot-password",
+      "regex": "^/auth/forgot\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/forgot\\-password(?:/)?$"
+    },
+    {
+      "page": "/auth/login",
+      "regex": "^/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/login(?:/)?$"
+    },
+    {
+      "page": "/auth/reset-password",
+      "regex": "^/auth/reset\\-password(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/reset\\-password(?:/)?$"
+    },
+    {
+      "page": "/auth/signup",
+      "regex": "^/auth/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/signup(?:/)?$"
+    },
+    {
+      "page": "/auth/verify-email/confirm",
+      "regex": "^/auth/verify\\-email/confirm(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/auth/verify\\-email/confirm(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/reports",
+      "regex": "^/dashboard/admin/reports(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/reports(?:/)?$"
+    },
+    {
+      "page": "/dashboard/bids",
+      "regex": "^/dashboard/bids(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/bids(?:/)?$"
+    },
+    {
+      "page": "/dashboard/bounty",
+      "regex": "^/dashboard/bounty(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/bounty(?:/)?$"
+    },
+    {
+      "page": "/dashboard/profile",
+      "regex": "^/dashboard/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/profile(?:/)?$"
+    },
+    {
+      "page": "/dashboard/projects/create",
+      "regex": "^/dashboard/projects/create(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/projects/create(?:/)?$"
+    },
+    {
+      "page": "/dashboard/settings",
+      "regex": "^/dashboard/settings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/settings(?:/)?$"
+    },
+    {
+      "page": "/dashboard/vdp",
+      "regex": "^/dashboard/vdp(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/vdp(?:/)?$"
+    },
+    {
+      "page": "/dashboard/withdrawals",
+      "regex": "^/dashboard/withdrawals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/withdrawals(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/manifest.webmanifest",
+      "regex": "^/manifest\\.webmanifest(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/manifest\\.webmanifest(?:/)?$"
+    },
+    {
+      "page": "/projects",
+      "regex": "^/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/projects(?:/)?$"
+    },
+    {
+      "page": "/signup",
+      "regex": "^/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/signup(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}
