@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/api/auth';
 import { fetchAuthenticatedFile } from '@/lib/api/files';
 import { getMessages, sendMessage, type WorkspaceMessage } from '@/lib/api/messages';
 import { completeProject, depositPayment, releasePayment } from '@/lib/api/payments';
+import { RazorpayCheckoutButton } from '@/components/razorpay-checkout-button';
 import { getProjectById, type ProjectItem } from '@/lib/api/projects';
 import { createReport, getReports, type WorkspaceReport } from '@/lib/api/reports';
 import { createReview } from '@/lib/api/reviews';
@@ -601,9 +602,19 @@ export default function ProjectWorkspacePage() {
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(Number(e.target.value))}
                     />
-                    <Button type="button" disabled={isDepositing} onClick={handleDeposit}>
-                      {isDepositing ? 'Depositing...' : 'Deposit Payment'}
-                    </Button>
+                    {token ? (
+                      <RazorpayCheckoutButton
+                        token={token}
+                        projectId={project.id}
+                        amount={depositAmount}
+                        onSuccess={refreshWorkspace}
+                      />
+                    ) : null}
+                    {process.env.NEXT_PUBLIC_ENABLE_LEDGER_DEPOSIT === 'true' ? (
+                      <Button type="button" disabled={isDepositing} onClick={handleDeposit}>
+                        {isDepositing ? 'Depositing...' : 'Deposit (ledger dev)'}
+                      </Button>
+                    ) : null}
                   </div>
                 ) : (
                   <div className="space-y-2">

@@ -52,6 +52,14 @@
       "namedRegex": "^/projects/(?<nxtPid>[^/]+?)/bid(?:/)?$"
     },
     {
+      "page": "/providers/[id]",
+      "regex": "^/providers/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/providers/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/vdp/[id]",
       "regex": "^/vdp/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -122,6 +130,18 @@
       "namedRegex": "^/dashboard(?:/)?$"
     },
     {
+      "page": "/dashboard/admin/disputes",
+      "regex": "^/dashboard/admin/disputes(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/disputes(?:/)?$"
+    },
+    {
+      "page": "/dashboard/admin/kyc",
+      "regex": "^/dashboard/admin/kyc(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/kyc(?:/)?$"
+    },
+    {
       "page": "/dashboard/admin/reports",
       "regex": "^/dashboard/admin/reports(?:/)?$",
       "routeKeys": {},
@@ -180,6 +200,12 @@
       "regex": "^/manifest\\.webmanifest(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/manifest\\.webmanifest(?:/)?$"
+    },
+    {
+      "page": "/marketplace",
+      "regex": "^/marketplace(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/marketplace(?:/)?$"
     },
     {
       "page": "/projects",

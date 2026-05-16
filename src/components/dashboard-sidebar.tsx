@@ -30,7 +30,11 @@ export function DashboardSidebar({ mobileOpen = false, onMobileClose }: Dashboar
   const items = [
     ...baseItems,
     ...(user?.role === 'ADMIN'
-      ? [{ href: '/dashboard/admin/reports', label: 'Admin Reports', match: 'prefix' as const }]
+      ? [
+          { href: '/dashboard/admin/reports', label: 'Admin Reports', match: 'prefix' as const },
+          { href: '/dashboard/admin/kyc', label: 'KYC Queue', match: 'prefix' as const },
+          { href: '/dashboard/admin/disputes', label: 'Disputes', match: 'prefix' as const },
+        ]
       : []),
   ];
 

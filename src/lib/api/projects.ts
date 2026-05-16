@@ -91,7 +91,7 @@ export async function getProjects(token: string) {
 
 export async function getPublicProjects() {
   try {
-    const res = await fetch(`${API_BASE_URL}/projects`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/public/projects`, { cache: 'no-store' });
     return await parseResponse<ProjectItem[]>(res);
   } catch (error) {
     if (error instanceof ApiError) throw error;
@@ -114,7 +114,7 @@ export async function getProjectById(token: string, id: string) {
 
 export async function getPublicProjectById(id: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/projects/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/public/projects/${id}`, { cache: 'no-store' });
     return await parseResponse<ProjectItem>(res);
   } catch (error) {
     if (error instanceof ApiError) throw error;
