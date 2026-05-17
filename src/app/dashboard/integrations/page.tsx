@@ -14,7 +14,10 @@ import {
   listWebhookDeliveries,
   listWebhooks,
   revokeApiKey,
+  retryWebhookDelivery,
+  testWebhook,
   type ApiKeyRow,
+  type ApiScope,
   type WebhookDeliveryRow,
   type WebhookEvent,
   type WebhookRow,
@@ -33,6 +36,7 @@ function IntegrationsContent() {
   const [keys, setKeys] = useState<ApiKeyRow[]>([]);
   const [webhooks, setWebhooks] = useState<WebhookRow[]>([]);
   const [newKeyLabel, setNewKeyLabel] = useState('Production');
+  const [keyScopes, setKeyScopes] = useState<ApiScope[]>(['read']);
   const [createdKey, setCreatedKey] = useState('');
   const [whLabel, setWhLabel] = useState('Slack / SIEM');
   const [whUrl, setWhUrl] = useState('https://example.com/webhooks/hackersdeal');
@@ -88,14 +92,47 @@ function IntegrationsContent() {
           <li>
             <code className="rounded bg-slate-100 px-1">GET /v1/projects/:id/milestones</code>
           </li>
+          <li>
+            <code className="rounded bg-slate-100 px-1">POST /v1/projects/:id/reports</code> (scope{' '}
+            <code className="rounded bg-slate-100 px-1">write:reports</code>)
+          </li>
         </ul>
+        <div className="flex flex-wrap gap-3 text-xs">
+          <label className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={keyScopes.includes('read')}
+              onChange={() =>
+                setKeyScopes((prev) =>
+                  prev.includes('read') ? prev.filter((s) => s !== 'read') : [...prev, 'read'],
+                )
+              }
+            />
+            read
+          </label>
+          <label className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={keyScopes.includes('write:reports')}
+              onChange={() =>
+                setKeyScopes((prev) =>
+                  prev.includes('write:reports')
+                    ? prev.filter((s) => s !== 'write:reports')
+                    : [...prev, 'write:reports'],
+                )
+              }
+            />
+            write:reports
+          </label>
+        </div>
+        <p className="text-xs text-slate-500">Rate limit: 120 requests/min per API key (when Redis is running).</p>
         <div className="flex gap-2">
           <Input value={newKeyLabel} onChange={(e) => setNewKeyLabel(e.target.value)} placeholder="Key label" />
           <Button
             type="button"
             onClick={async () => {
-              if (!token) return;
-              const res = await createApiKey(token, newKeyLabel);
+              if (!token || keyScopes.length === 0) return;
+              const res = await createApiKey(token, newKeyLabel, keyScopes);
               setCreatedKey(res.apiKey);
               setMessage('Copy your API key now — it will not be shown again.');
               await reload();
@@ -112,6 +149,7 @@ function IntegrationsContent() {
             <li key={k.id} className="flex items-center justify-between rounded border border-slate-200 p-2">
               <span>
                 {k.label} · <span className="font-mono text-xs">{k.keyPrefix}…</span>
+                <span className="ml-1 text-xs text-slate-500">({k.scopes.join(', ')})</span>
               </span>
               <Button
                 type="button"
@@ -185,6 +223,17 @@ function IntegrationsContent() {
                   variant="secondary"
                   onClick={async () => {
                     if (!token) return;
+                    await testWebhook(token, w.id);
+                    setMessage('Test webhook queued — check deliveries in a few seconds.');
+                  }}
+                >
+                  Send test
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={async () => {
+                    if (!token) return;
                     setDeliveries(await listWebhookDeliveries(token, w.id));
                   }}
                 >
@@ -208,8 +257,25 @@ function IntegrationsContent() {
         {deliveries.length > 0 ? (
           <ul className="text-xs text-slate-600 space-y-1 border-t pt-2">
             {deliveries.map((d) => (
-              <li key={d.id}>
-                {d.event} · {d.success ? 'OK' : 'FAIL'} {d.statusCode ?? ''} · {new Date(d.createdAt).toLocaleString()}
+              <li key={d.id} className="flex flex-wrap items-center gap-2">
+                <span>
+                  {d.event} · {d.success ? 'OK' : 'FAIL'} {d.statusCode ?? ''} ·{' '}
+                  {new Date(d.createdAt).toLocaleString()}
+                </span>
+                {!d.success ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="!py-0.5 !px-2 !text-[10px]"
+                    onClick={async () => {
+                      if (!token) return;
+                      await retryWebhookDelivery(token, d.id);
+                      setMessage('Delivery re-queued for retry.');
+                    }}
+                  >
+                    Retry
+                  </Button>
+                ) : null}
               </li>
             ))}
           </ul>

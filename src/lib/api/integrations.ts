@@ -45,12 +45,17 @@ export async function listApiKeys(token: string) {
   return apiJson<ApiKeyRow[]>('/integrations/api-keys', { token });
 }
 
-export async function createApiKey(token: string, label: string) {
-  return apiJson<{ apiKey: string; keyPrefix: string; label: string }>('/integrations/api-keys', {
-    method: 'POST',
-    token,
-    body: JSON.stringify({ label }),
-  });
+export type ApiScope = 'read' | 'write:reports';
+
+export async function createApiKey(token: string, label: string, scopes?: ApiScope[]) {
+  return apiJson<{ apiKey: string; keyPrefix: string; label: string; scopes: ApiScope[] }>(
+    '/integrations/api-keys',
+    {
+      method: 'POST',
+      token,
+      body: JSON.stringify({ label, scopes }),
+    },
+  );
 }
 
 export async function revokeApiKey(token: string, id: string) {
@@ -86,4 +91,18 @@ export async function deleteWebhook(token: string, id: string) {
 
 export async function listWebhookDeliveries(token: string, webhookId: string) {
   return apiJson<WebhookDeliveryRow[]>(`/integrations/webhooks/${webhookId}/deliveries`, { token });
+}
+
+export async function testWebhook(token: string, webhookId: string) {
+  return apiJson<{ ok: boolean; message: string }>(`/integrations/webhooks/${webhookId}/test`, {
+    method: 'POST',
+    token,
+  });
+}
+
+export async function retryWebhookDelivery(token: string, deliveryId: string) {
+  return apiJson<{ ok: boolean; message: string }>(
+    `/integrations/webhooks/deliveries/${deliveryId}/retry`,
+    { method: 'POST', token },
+  );
 }
