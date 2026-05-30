@@ -10,6 +10,7 @@ const links = [
   { href: '/dashboard/admin/disputes', label: 'Disputes' },
   { href: '/dashboard/admin/kyc', label: 'KYC' },
   { href: '/dashboard/admin/withdrawals', label: 'Withdrawals' },
+  { href: '/dashboard/admin/fraud', label: 'Fraud' },
   { href: '/dashboard/admin/analytics', label: 'Analytics' },
   { href: '/dashboard/admin/emails', label: 'Email templates' },
   { href: '/dashboard/admin/settings', label: 'Settings' },

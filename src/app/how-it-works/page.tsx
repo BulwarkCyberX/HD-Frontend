@@ -24,9 +24,9 @@ export default function HowItWorksPage() {
   return (
     <main className="mx-auto max-w-4xl space-y-10 px-4 py-16">
       <header className="space-y-4 text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-tropical-jade-600">How it works</p>
-        <h1 className="text-4xl font-semibold text-slate-900">Security work, end to end</h1>
-        <p className="mx-auto max-w-2xl text-slate-600">
+        <p className="text-sm font-medium uppercase tracking-wide text-tropical-aqua-300">How it works</p>
+        <h1 className="text-4xl font-semibold text-neutral-50">Security work, end to end</h1>
+        <p className="mx-auto max-w-2xl text-neutral-300">
           HackersDeal is a cybersecurity-native marketplace — not a generic freelance board. Every flow is built
           for pentests, assessments, and coordinated disclosure.
         </p>
@@ -37,20 +37,20 @@ export default function HowItWorksPage() {
       <ol className="space-y-4">
         {steps.map((step, i) => (
           <li key={step.title}>
-            <Card>
-              <p className="text-xs font-medium text-tropical-jade-600">Step {i + 1}</p>
-              <h2 className="mt-1 text-lg font-semibold text-slate-900">{step.title}</h2>
-              <p className="mt-2 text-sm text-slate-600">{step.body}</p>
+            <Card surface="dark">
+              <p className="text-xs font-medium text-tropical-aqua-300">Step {i + 1}</p>
+              <h2 className="mt-1 text-lg font-semibold text-neutral-50">{step.title}</h2>
+              <p className="mt-2 text-sm text-neutral-300">{step.body}</p>
             </Card>
           </li>
         ))}
       </ol>
-      <p className="text-center text-sm text-slate-500">
-        <Link href="/pricing" className="underline">
+      <p className="text-center text-sm text-neutral-400">
+        <Link href="/pricing" className="text-tropical-aqua-300 underline">
           View pricing & fees
         </Link>
         {' · '}
-        <Link href="/marketplace" className="underline">
+        <Link href="/marketplace" className="text-tropical-aqua-300 underline">
           Browse marketplace
         </Link>
       </p>

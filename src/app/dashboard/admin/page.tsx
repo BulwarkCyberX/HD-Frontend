@@ -35,6 +35,11 @@ const shortcuts = [
     description: 'Approve provider payout requests after KYC.',
   },
   {
+    href: '/dashboard/admin/fraud',
+    title: 'Fraud flags',
+    description: 'Review velocity-based fraud scores and clear false positives.',
+  },
+  {
     href: '/dashboard/admin/analytics',
     title: 'Analytics',
     description: 'Platform GMV, users, projects by status, and operational queues.',

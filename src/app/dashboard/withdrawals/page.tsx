@@ -68,12 +68,12 @@ export default function WithdrawalsPage() {
         <input
           type="number"
           min={1}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
         />
         <select
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
           value={currency}
           onChange={(e) => setCurrency(e.target.value as 'INR' | 'USD')}
         >

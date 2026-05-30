@@ -100,7 +100,7 @@ function MilestonesPanel({
         <div className="space-y-2 rounded-md border border-slate-200 p-3">
           <p className="text-sm font-semibold text-slate-900">New milestone</p>
           <input
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
             placeholder="Title"
             value={milestoneTitle}
             onChange={(e) => setMilestoneTitle(e.target.value)}
@@ -109,12 +109,12 @@ function MilestonesPanel({
             <input
               type="number"
               min={1}
-              className="w-32 rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="w-32 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
               value={milestoneAmount}
               onChange={(e) => setMilestoneAmount(Number(e.target.value))}
             />
             <select
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
               value={milestoneCurrency}
               onChange={(e) => setMilestoneCurrency(e.target.value as 'INR' | 'USD')}
             >
@@ -628,7 +628,7 @@ export default function ProjectWorkspacePage() {
                     <input
                       type="number"
                       min={1}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(Number(e.target.value))}
                     />
@@ -775,7 +775,7 @@ export default function ProjectWorkspacePage() {
 
                     <div className="flex gap-2">
                       <input
-                        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                         placeholder="Type your message..."
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
@@ -836,7 +836,7 @@ export default function ProjectWorkspacePage() {
                       <div className="space-y-2 rounded-md border border-slate-200 p-3">
                         <p className="text-sm font-medium text-slate-900">Submit Report</p>
                         <input
-                          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                           placeholder="Title"
                           value={reportForm.title}
                           onChange={(e) => setReportForm((prev) => ({ ...prev, title: e.target.value }))}
@@ -851,7 +851,7 @@ export default function ProjectWorkspacePage() {
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <select
-                            className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+                            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                             value={reportForm.severity}
                             onChange={(e) =>
                               setReportForm((prev) => ({

@@ -10,8 +10,8 @@ export default async function PublicProviderPage({ params }: { params: Promise<{
   } catch {
     return (
       <main className="mx-auto max-w-3xl px-4 py-16">
-        <p className="text-slate-600">Provider not found.</p>
-        <Link href="/marketplace" className="mt-4 inline-block text-sm underline">
+        <p className="text-neutral-300">Provider not found.</p>
+        <Link href="/marketplace" className="mt-4 inline-block text-sm text-tropical-aqua-300 underline">
           Back to marketplace
         </Link>
       </main>
@@ -21,15 +21,15 @@ export default async function PublicProviderPage({ params }: { params: Promise<{
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-12">
       <div>
-        <p className="text-sm text-tropical-jade-700">Security provider</p>
-        <h1 className="text-3xl font-semibold text-slate-900">{provider.displayName}</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="text-sm text-tropical-aqua-300">Security provider</p>
+        <h1 className="text-3xl font-semibold text-neutral-50">{provider.displayName}</h1>
+        <p className="mt-1 text-sm text-neutral-300">
           {provider.city ? `${provider.city}, ` : ''}
           {provider.country ?? 'Global'} · {provider.profile.availabilityStatus}
         </p>
       </div>
 
-      {provider.profile.bio ? <p className="text-slate-700">{provider.profile.bio}</p> : null}
+      {provider.profile.bio ? <p className="text-neutral-200">{provider.profile.bio}</p> : null}
 
       <section className="grid gap-4 sm:grid-cols-3">
         <Stat label="Rating" value={provider.profile.rating.toFixed(1)} />
@@ -39,12 +39,12 @@ export default async function PublicProviderPage({ params }: { params: Promise<{
 
       {Array.isArray(provider.profile.portfolio) && provider.profile.portfolio.length > 0 ? (
         <section>
-          <h2 className="font-semibold text-slate-900">Portfolio</h2>
-          <ul className="mt-2 space-y-2 text-sm text-slate-700">
+          <h2 className="font-semibold text-neutral-50">Portfolio</h2>
+          <ul className="mt-2 space-y-2 text-sm text-neutral-200">
             {(provider.profile.portfolio as { title?: string; summary?: string }[]).map((item, i) => (
-              <li key={i} className="rounded-md border border-slate-200 p-3">
+              <li key={i} className="rounded-md border border-neutral-700 p-3">
                 {item.title ? <p className="font-medium">{item.title}</p> : null}
-                {item.summary ? <p className="text-slate-600">{item.summary}</p> : null}
+                {item.summary ? <p className="text-neutral-300">{item.summary}</p> : null}
               </li>
             ))}
           </ul>
@@ -53,10 +53,10 @@ export default async function PublicProviderPage({ params }: { params: Promise<{
 
       {provider.profile.skills.length > 0 ? (
         <section>
-          <h2 className="font-semibold text-slate-900">Skills</h2>
+          <h2 className="font-semibold text-neutral-50">Skills</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             {provider.profile.skills.map((s) => (
-              <span key={s} className="rounded-full bg-tropical-sage-100 px-3 py-1 text-xs text-slate-800">
+              <span key={s} className="rounded-full bg-neutral-800 px-3 py-1 text-xs text-neutral-200">
                 {s}
               </span>
             ))}

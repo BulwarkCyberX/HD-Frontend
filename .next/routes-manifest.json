@@ -186,6 +186,12 @@
       "namedRegex": "^/dashboard/admin/emails(?:/)?$"
     },
     {
+      "page": "/dashboard/admin/fraud",
+      "regex": "^/dashboard/admin/fraud(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/admin/fraud(?:/)?$"
+    },
+    {
       "page": "/dashboard/admin/kyc",
       "regex": "^/dashboard/admin/kyc(?:/)?$",
       "routeKeys": {},

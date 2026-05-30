@@ -84,7 +84,7 @@ export default function ProfilePage() {
           <div>
             <label className="text-sm font-medium text-slate-700">Availability</label>
             <select
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
               value={availability}
               onChange={(e) => setAvailability(e.target.value as typeof availability)}
             >

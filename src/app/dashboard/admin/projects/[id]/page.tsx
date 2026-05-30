@@ -114,7 +114,7 @@ export default function AdminProjectDetailPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Status">
             <select
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
               value={project.status}
               onChange={(e) => setProject({ ...project, status: e.target.value })}
             >
@@ -127,7 +127,7 @@ export default function AdminProjectDetailPage() {
           </Field>
           <Field label="Visibility">
             <select
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
               value={project.visibility}
               onChange={(e) => setProject({ ...project, visibility: e.target.value })}
             >
@@ -147,7 +147,7 @@ export default function AdminProjectDetailPage() {
           </Field>
           <Field label="Budget type">
             <select
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
               value={project.budgetType}
               onChange={(e) => setProject({ ...project, budgetType: e.target.value })}
             >

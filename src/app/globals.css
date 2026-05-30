@@ -3,11 +3,21 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: dark light;
 }
 
 body {
   @apply min-h-screen bg-neutral-950 text-neutral-50 antialiased;
+}
+
+/* Force light color-scheme on form elements inside light containers */
+.bg-tropical-sage-50 select,
+.bg-tropical-sage-50 input,
+.bg-tropical-sage-50 textarea,
+.bg-white select,
+.bg-white input,
+.bg-white textarea {
+  color-scheme: light;
 }
 
 /* Subtle Upwork-like background texture */

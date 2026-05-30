@@ -24,26 +24,27 @@ export default function TrustPage() {
   return (
     <main className="mx-auto max-w-4xl space-y-10 px-4 py-16">
       <header className="space-y-3 text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-tropical-jade-600">Trust & safety</p>
-        <h1 className="text-4xl font-semibold text-slate-900">Built for security engagements</h1>
-        <p className="mx-auto max-w-2xl text-slate-600">
+        <p className="text-sm font-medium uppercase tracking-wide text-tropical-aqua-300">Trust & safety</p>
+        <h1 className="text-4xl font-semibold text-neutral-50">Built for security engagements</h1>
+        <p className="mx-auto max-w-2xl text-neutral-300">
           HackersDeal combines marketplace flexibility with controls enterprises expect for offensive security work.
         </p>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {pillars.map((p) => (
-          <Card key={p.title}>
-            <h2 className="font-semibold text-slate-900">{p.title}</h2>
-            <p className="mt-2 text-sm text-slate-600">{p.body}</p>
+          <Card key={p.title} surface="dark">
+            <h2 className="font-semibold text-neutral-50">{p.title}</h2>
+            <p className="mt-2 text-sm text-neutral-300">{p.body}</p>
           </Card>
         ))}
       </div>
 
-      <Card className="bg-tropical-sage-50/50 text-center">
-        <p className="text-sm text-slate-700">
+      <Card surface="dark" className="text-center">
+        <p className="text-sm text-neutral-300">
           Payments via Razorpay (INR). Platform fees apply on escrow release. Admin tools cover KYC, disputes, and
-          email templates.
+          email templates. Enterprise orgs can enable OIDC SSO. Compliance drafts are in{' '}
+          <code className="rounded bg-neutral-800 px-1 text-neutral-200">docs/compliance/</code>.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Link href="/how-it-works">

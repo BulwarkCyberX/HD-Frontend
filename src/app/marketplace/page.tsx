@@ -86,21 +86,21 @@ export default function MarketplacePage() {
   return (
     <main className="mx-auto max-w-6xl space-y-10 px-4 py-12">
       <section className="space-y-4">
-        <h1 className="text-3xl font-semibold text-slate-900">Security marketplace</h1>
-        <p className="max-w-2xl text-slate-600">
+        <h1 className="text-3xl font-semibold text-neutral-50">Security marketplace</h1>
+        <p className="max-w-2xl text-neutral-300">
           Discover public penetration testing and security engagements. No login required to browse.
         </p>
         <div className="flex gap-2">
           <button
             type="button"
-            className={`rounded-md px-3 py-1.5 text-sm ${tab === 'projects' ? 'bg-slate-900 text-white' : 'bg-slate-100'}`}
+            className={`rounded-md px-3 py-1.5 text-sm ${tab === 'projects' ? 'bg-tropical-jade-500 text-white' : 'bg-neutral-800 text-neutral-200'}`}
             onClick={() => setTab('projects')}
           >
             Projects
           </button>
           <button
             type="button"
-            className={`rounded-md px-3 py-1.5 text-sm ${tab === 'providers' ? 'bg-slate-900 text-white' : 'bg-slate-100'}`}
+            className={`rounded-md px-3 py-1.5 text-sm ${tab === 'providers' ? 'bg-tropical-jade-500 text-white' : 'bg-neutral-800 text-neutral-200'}`}
             onClick={() => setTab('providers')}
           >
             Providers
@@ -122,7 +122,7 @@ export default function MarketplacePage() {
           {tab === 'projects' ? (
             <>
               <select
-                className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-md border border-neutral-700 bg-neutral-800 px-2 py-2 text-sm text-neutral-100"
                 value={budgetType}
                 onChange={(e) => setBudgetType(e.target.value)}
               >
@@ -132,7 +132,7 @@ export default function MarketplacePage() {
                 <option value="MILESTONE">Milestone</option>
               </select>
               <select
-                className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+                className="rounded-md border border-neutral-700 bg-neutral-800 px-2 py-2 text-sm text-neutral-100"
                 value={sort}
                 onChange={(e) => setSort(e.target.value as PublicProjectFilters['sort'])}
               >
@@ -152,12 +152,12 @@ export default function MarketplacePage() {
             </Button>
           </div>
         ) : null}
-        {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+        {message ? <p className="text-sm text-emerald-400">{message}</p> : null}
       </section>
 
       {tab === 'projects' && featured.length > 0 ? (
         <section>
-          <h2 className="text-lg font-semibold text-slate-900">Featured providers</h2>
+          <h2 className="text-lg font-semibold text-tropical-aqua-300">Featured providers</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((row) => {
               const p = row as {
@@ -186,10 +186,10 @@ export default function MarketplacePage() {
       ) : null}
 
       <section>
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-tropical-aqua-300">
           {tab === 'projects' ? 'Open projects' : 'Matching providers'}
         </h2>
-        {loading ? <p className="mt-2 text-sm text-slate-600">Loading…</p> : null}
+        {loading ? <p className="mt-2 text-sm text-neutral-400">Loading…</p> : null}
         {tab === 'projects' ? (
           <div className="mt-4 space-y-3">
             {projects.map((project) => (
@@ -209,7 +209,7 @@ export default function MarketplacePage() {
         ) : (
           <div className="mt-4 space-y-3">
             {providers.length === 0 ? (
-              <Card className="text-sm text-slate-600">Enter at least 2 characters to search providers.</Card>
+              <Card surface="dark" className="text-sm text-neutral-300">Enter at least 2 characters to search providers.</Card>
             ) : (
               providers.map((p) => (
                 <Link

@@ -53,7 +53,7 @@ export default function PublicVdpPage() {
   if (error && !vdp) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-rose-600">{error}</p>
+        <p className="text-rose-400">{error}</p>
       </main>
     );
   }
@@ -61,7 +61,7 @@ export default function PublicVdpPage() {
   if (!vdp) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-slate-500">Loading…</p>
+        <p className="text-neutral-400">Loading…</p>
       </main>
     );
   }
@@ -69,8 +69,8 @@ export default function PublicVdpPage() {
   return (
     <main className="mx-auto max-w-3xl space-y-8 px-4 py-12">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900">{vdp.title}</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="text-3xl font-semibold text-neutral-50">{vdp.title}</h1>
+        <p className="mt-2 text-sm text-neutral-400">
           Responsible disclosure channel — no bounty payouts through this page.
         </p>
       </div>
@@ -145,7 +145,7 @@ export default function PublicVdpPage() {
       </Card>
 
       {token ? (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-neutral-400">
           Organization users can also attach files while signed in from the dashboard flows.
         </p>
       ) : null}

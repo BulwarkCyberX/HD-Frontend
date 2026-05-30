@@ -15,6 +15,7 @@ import {
   type LinkableProject,
   type OrganizationDetail,
 } from '@/lib/api/organizations';
+import { OrgSsoSettings } from '@/components/org-sso-settings';
 
 export default function OrganizationDetailPage() {
   return (
@@ -25,7 +26,7 @@ export default function OrganizationDetailPage() {
 }
 
 function OrgDetailContent() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const params = useParams<{ id: string }>();
   const [org, setOrg] = useState<OrganizationDetail | null>(null);
   const [linkable, setLinkable] = useState<LinkableProject[]>([]);
@@ -84,6 +85,9 @@ function OrgDetailContent() {
 
   if (!org) return <p className="text-sm text-slate-600">Loading…</p>;
 
+  const myRole = org.members.find((m) => m.user.id === user?.id)?.role;
+  const canManageSso = myRole === 'OWNER';
+
   return (
     <section className="mx-auto max-w-3xl space-y-6">
       <Link href="/dashboard/organization" className="text-sm text-tropical-jade-700 underline">
@@ -106,7 +110,7 @@ function OrgDetailContent() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Input placeholder="user@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           <select
-            className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+            className="rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
             value={role}
             onChange={(e) => setRole(e.target.value as typeof role)}
           >
@@ -119,6 +123,10 @@ function OrgDetailContent() {
           </Button>
         </div>
       </Card>
+
+      {token ? (
+        <OrgSsoSettings token={token} orgId={org.id} orgSlug={org.slug} canManage={canManageSso} />
+      ) : null}
 
       <Card>
         <h2 className="font-semibold text-slate-900">Linked projects</h2>
@@ -148,7 +156,7 @@ function OrgDetailContent() {
             <div className="min-w-[200px] flex-1">
               <label className="mb-1 block text-xs font-medium text-slate-600">Link a project you own</label>
               <select
-                className="w-full rounded-md border border-slate-300 px-2 py-2 text-sm"
+                className="w-full rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900"
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
               >
