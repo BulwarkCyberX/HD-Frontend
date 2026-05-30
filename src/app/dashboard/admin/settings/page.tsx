@@ -10,6 +10,7 @@ import { sendWeeklyDigestsAdmin } from '@/lib/api/notifications-admin';
 import {
   getPlatformSettings,
   updatePlatformSettings,
+  sendTestEmail,
   type MailProvider,
   type PlatformSettings,
   type SessionPolicy,
@@ -96,7 +97,7 @@ function AdminSettingsContent() {
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
 
       {/* 1) Email Configuration */}
-      {settings ? <EmailConfigCard settings={settings} onSave={save} saving={saving} /> : null}
+      {settings ? <EmailConfigCard settings={settings} onSave={save} saving={saving} token={token} /> : null}
 
       {/* 2) Token Expiry */}
       {settings ? <TokenExpiryCard settings={settings} onSave={save} saving={saving} /> : null}
@@ -142,10 +143,12 @@ function EmailConfigCard({
   settings,
   onSave,
   saving,
+  token,
 }: {
   settings: PlatformSettings;
   onSave: (patch: Partial<PlatformSettings>) => Promise<void>;
   saving: boolean;
+  token: string | null;
 }) {
   const [provider, setProvider] = useState<MailProvider>(settings.mailProvider);
   const [primaryProvider, setPrimaryProvider] = useState<MailProvider>(settings.primaryMailProvider || 'SMTP');
@@ -162,6 +165,23 @@ function EmailConfigCard({
   const [awsSesRegion, setAwsSesRegion] = useState(settings.awsSesRegion || 'us-east-1');
   const [postmarkServerToken, setPostmarkServerToken] = useState(settings.postmarkServerToken);
   const [alreadyAddedLabel, setAlreadyAddedLabel] = useState('');
+  const [testTo, setTestTo] = useState('');
+  const [testBusy, setTestBusy] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null);
+
+  const handleTestEmail = async () => {
+    if (!token || !testTo.trim()) return;
+    setTestBusy(true);
+    setTestResult(null);
+    try {
+      const result = await sendTestEmail(token, testTo.trim());
+      setTestResult(result);
+    } catch (e) {
+      setTestResult({ success: false, error: e instanceof Error ? e.message : 'Request failed' });
+    } finally {
+      setTestBusy(false);
+    }
+  };
 
   // When provider changes, check if creds are already set and reset them
   const handleProviderChange = (newProvider: MailProvider) => {
@@ -362,6 +382,36 @@ function EmailConfigCard({
       <Button type="button" disabled={saving} onClick={handleSave}>
         {saving ? 'Saving…' : 'Save email settings'}
       </Button>
+
+      {/* Test Email Section */}
+      <div className="mt-4 rounded-md border border-dashed border-tropical-jade-300 bg-tropical-sage-50/50 p-4 space-y-3">
+        <p className="text-sm font-medium text-slate-800">🧪 Test connection & send test email</p>
+        <p className="text-xs text-slate-600">Save settings first, then enter an email below and click test. A dummy email will be sent to verify your configuration works.</p>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            className="min-w-[220px] flex-1"
+            placeholder="recipient@example.com"
+            type="email"
+            value={testTo}
+            onChange={(e) => { setTestTo(e.target.value); setTestResult(null); }}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={testBusy || !testTo.trim()}
+            onClick={handleTestEmail}
+          >
+            {testBusy ? 'Sending…' : '📨 Send test email'}
+          </Button>
+        </div>
+        {testResult ? (
+          testResult.success ? (
+            <p className="text-sm text-emerald-700">✅ Test email sent successfully! Check the inbox.</p>
+          ) : (
+            <p className="text-sm text-rose-600">❌ Failed: {testResult.error || 'Unknown error'}</p>
+          )
+        ) : null}
+      </div>
     </Card>
   );
 }

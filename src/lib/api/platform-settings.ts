@@ -39,3 +39,11 @@ export async function updatePlatformSettings(token: string, payload: Partial<Pla
     body: JSON.stringify(payload),
   });
 }
+
+export async function sendTestEmail(token: string, to: string) {
+  return apiJson<{ success: boolean; error?: string }>('/admin/settings/test-email', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ to }),
+  });
+}
