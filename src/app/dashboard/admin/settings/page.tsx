@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input } from '@hackersdeal/ui';
 import { ProtectedRoute } from '@/components/protected-route';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { sendWeeklyDigestsAdmin } from '@/lib/api/notifications-admin';
 import {
@@ -82,7 +83,7 @@ function AdminSettingsContent() {
     return <p className="text-sm text-slate-600">Admin access required.</p>;
   }
 
-  if (loading) return <p className="text-sm text-slate-600">Loading settings…</p>;
+  if (loading) return <Spinner size="md" label="Loading settings…" />;
 
   return (
     <section className="space-y-6">
@@ -147,6 +148,7 @@ function EmailConfigCard({
   saving: boolean;
 }) {
   const [provider, setProvider] = useState<MailProvider>(settings.mailProvider);
+  const [primaryProvider, setPrimaryProvider] = useState<MailProvider>(settings.primaryMailProvider || 'SMTP');
   const [fromAddress, setFromAddress] = useState(settings.mailFromAddress);
   const [fromName, setFromName] = useState(settings.mailFromName);
   const [replyTo, setReplyTo] = useState(settings.mailReplyTo);
@@ -155,10 +157,54 @@ function EmailConfigCard({
   const [smtpUser, setSmtpUser] = useState(settings.smtpUser);
   const [smtpPassword, setSmtpPassword] = useState(settings.smtpPassword);
   const [sendgridApiKey, setSendgridApiKey] = useState(settings.sendgridApiKey);
+  const [awsSesAccessKeyId, setAwsSesAccessKeyId] = useState(settings.awsSesAccessKeyId);
+  const [awsSesSecretKey, setAwsSesSecretKey] = useState(settings.awsSesSecretKey);
+  const [awsSesRegion, setAwsSesRegion] = useState(settings.awsSesRegion || 'us-east-1');
+  const [postmarkServerToken, setPostmarkServerToken] = useState(settings.postmarkServerToken);
+  const [alreadyAddedLabel, setAlreadyAddedLabel] = useState('');
+
+  // When provider changes, check if creds are already set and reset them
+  const handleProviderChange = (newProvider: MailProvider) => {
+    const prev = provider;
+    setProvider(newProvider);
+
+    // If switching away from a provider that had creds, reset those creds
+    if (prev !== newProvider) {
+      if (prev === 'SMTP' && settings.smtpPassword) {
+        setSmtpHost(''); setSmtpPort(587); setSmtpUser(''); setSmtpPassword('');
+      }
+      if (prev === 'SENDGRID' && settings.sendgridApiKey) {
+        setSendgridApiKey('');
+      }
+      if (prev === 'AWS_SES' && settings.awsSesSecretKey) {
+        setAwsSesAccessKeyId(''); setAwsSesSecretKey(''); setAwsSesRegion('us-east-1');
+      }
+      if (prev === 'POSTMARK' && settings.postmarkServerToken) {
+        setPostmarkServerToken('');
+      }
+    }
+
+    // Show "already added" label if the new provider already has creds configured
+    if (newProvider === 'SMTP' && settings.smtpPassword) {
+      showAlreadyAdded('SMTP credentials already configured');
+    } else if (newProvider === 'SENDGRID' && settings.sendgridApiKey) {
+      showAlreadyAdded('SendGrid API key already configured');
+    } else if (newProvider === 'AWS_SES' && settings.awsSesSecretKey) {
+      showAlreadyAdded('AWS SES credentials already configured');
+    } else if (newProvider === 'POSTMARK' && settings.postmarkServerToken) {
+      showAlreadyAdded('Postmark token already configured');
+    }
+  };
+
+  const showAlreadyAdded = (msg: string) => {
+    setAlreadyAddedLabel(msg);
+    setTimeout(() => setAlreadyAddedLabel(''), 3000);
+  };
 
   const handleSave = () => {
     void onSave({
       mailProvider: provider,
+      primaryMailProvider: primaryProvider,
       mailFromAddress: fromAddress,
       mailFromName: fromName,
       mailReplyTo: replyTo,
@@ -167,15 +213,34 @@ function EmailConfigCard({
       smtpUser,
       smtpPassword,
       sendgridApiKey,
+      awsSesAccessKeyId,
+      awsSesSecretKey,
+      awsSesRegion,
+      postmarkServerToken,
     });
   };
+
+  // Providers available for "Primary default" in Auto mode (exclude AUTO and NONE)
+  const activeProviders: { value: MailProvider; label: string }[] = [
+    { value: 'SMTP', label: 'SMTP (Gmail / custom)' },
+    { value: 'SENDGRID', label: 'SendGrid' },
+    { value: 'AWS_SES', label: 'AWS SES' },
+    { value: 'POSTMARK', label: 'Postmark' },
+  ];
 
   return (
     <Card className="space-y-4">
       <h3 className="font-semibold text-slate-900">📧 Email service configuration</h3>
       <p className="text-sm text-slate-600">
         Select which mail provider to use and enter credentials. Changes take effect on next email send.
+        Only one provider can be active at a time.
       </p>
+
+      {alreadyAddedLabel ? (
+        <p className="text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+          ⚠️ {alreadyAddedLabel}
+        </p>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
@@ -183,11 +248,13 @@ function EmailConfigCard({
           <select
             className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
             value={provider}
-            onChange={(e) => setProvider(e.target.value as MailProvider)}
+            onChange={(e) => handleProviderChange(e.target.value as MailProvider)}
           >
-            <option value="AUTO">Auto (SMTP → SendGrid → None)</option>
+            <option value="AUTO">Auto (uses Primary default fallback)</option>
             <option value="SMTP">SMTP (Gmail / custom)</option>
             <option value="SENDGRID">SendGrid</option>
+            <option value="AWS_SES">AWS SES</option>
+            <option value="POSTMARK">Postmark</option>
             <option value="NONE">Disabled</option>
           </select>
         </div>
@@ -205,6 +272,26 @@ function EmailConfigCard({
         </div>
       </div>
 
+      {/* Primary default provider selector (only shown in AUTO mode) */}
+      {provider === 'AUTO' ? (
+        <div className="rounded-md border border-blue-100 bg-blue-50 p-4">
+          <label className="block text-sm font-medium text-blue-800">Primary default provider (for Auto fallback)</label>
+          <p className="text-xs text-blue-600 mb-2">
+            Auto mode tries this provider first, then falls back to others with configured credentials.
+          </p>
+          <select
+            className="w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-slate-900"
+            value={primaryProvider}
+            onChange={(e) => setPrimaryProvider(e.target.value as MailProvider)}
+          >
+            {activeProviders.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
+      {/* SMTP credentials */}
       {(provider === 'AUTO' || provider === 'SMTP') ? (
         <fieldset className="space-y-3 rounded-md border border-slate-200 p-4">
           <legend className="px-2 text-sm font-medium text-slate-700">SMTP credentials</legend>
@@ -229,12 +316,45 @@ function EmailConfigCard({
         </fieldset>
       ) : null}
 
+      {/* SendGrid credentials */}
       {(provider === 'AUTO' || provider === 'SENDGRID') ? (
         <fieldset className="space-y-3 rounded-md border border-slate-200 p-4">
           <legend className="px-2 text-sm font-medium text-slate-700">SendGrid credentials</legend>
           <div>
             <label className="block text-xs text-slate-600">API Key</label>
             <Input type="password" value={sendgridApiKey} onChange={(e) => setSendgridApiKey(e.target.value)} placeholder="SG.xxxxx" />
+          </div>
+        </fieldset>
+      ) : null}
+
+      {/* AWS SES credentials */}
+      {(provider === 'AUTO' || provider === 'AWS_SES') ? (
+        <fieldset className="space-y-3 rounded-md border border-slate-200 p-4">
+          <legend className="px-2 text-sm font-medium text-slate-700">AWS SES credentials</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs text-slate-600">Access Key ID</label>
+              <Input value={awsSesAccessKeyId} onChange={(e) => setAwsSesAccessKeyId(e.target.value)} placeholder="AKIA..." />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-600">Secret Access Key</label>
+              <Input type="password" value={awsSesSecretKey} onChange={(e) => setAwsSesSecretKey(e.target.value)} placeholder="••••••••" />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-600">Region</label>
+              <Input value={awsSesRegion} onChange={(e) => setAwsSesRegion(e.target.value)} placeholder="us-east-1" />
+            </div>
+          </div>
+        </fieldset>
+      ) : null}
+
+      {/* Postmark credentials */}
+      {(provider === 'AUTO' || provider === 'POSTMARK') ? (
+        <fieldset className="space-y-3 rounded-md border border-slate-200 p-4">
+          <legend className="px-2 text-sm font-medium text-slate-700">Postmark credentials</legend>
+          <div>
+            <label className="block text-xs text-slate-600">Server Token</label>
+            <Input type="password" value={postmarkServerToken} onChange={(e) => setPostmarkServerToken(e.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
           </div>
         </fieldset>
       ) : null}

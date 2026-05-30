@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { getCurrentUser } from '@/lib/api/auth';
 import { useAuth } from '@/hooks/auth-context';
 
@@ -57,7 +58,8 @@ export default function AuthCallbackPage() {
         <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center px-4 py-12 sm:px-6">
           <Card surface="dark" className="w-full max-w-md hd-fade-up">
             <h1 className="text-xl font-semibold text-neutral-50">Signing you in</h1>
-            <p className="mt-2 text-sm text-neutral-300">Loading callback…</p>
+            <p className="mt-2 text-sm text-neutral-300">Signing you in…</p>
+            <Spinner size="md" className="mt-3" />
           </Card>
         </main>
       }

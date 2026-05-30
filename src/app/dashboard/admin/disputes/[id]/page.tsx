@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button, Card, Textarea } from '@hackersdeal/ui';
 import { ProtectedRoute } from '@/components/protected-route';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import {
   addDisputeComment,
@@ -74,7 +75,7 @@ function AdminDisputeDetailContent() {
   }
 
   if (!detail) {
-    return <p className="text-sm text-slate-600">Loading dispute…</p>;
+    return <Spinner size="md" label="Loading dispute…" />;
   }
 
   const closed = ['RESOLVED', 'REFUNDED', 'REJECTED'].includes(detail.status);

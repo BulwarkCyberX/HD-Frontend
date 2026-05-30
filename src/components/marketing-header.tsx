@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 
 export function MarketingHeader() {
@@ -22,7 +23,7 @@ export function MarketingHeader() {
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium text-slate-600">
           {isLoading ? (
-            <span className="h-7 w-24 animate-pulse rounded-md bg-slate-100" aria-label="Loading session" />
+            <Spinner size="sm" />
           ) : (
             links.map((l) => (
               <Link

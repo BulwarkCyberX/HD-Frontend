@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProjectCard } from '@/components/project-card';
+import { Spinner } from '@/components/spinner';
 import { Button } from '@hackersdeal/ui';
 import { ApiError } from '@/lib/api/auth';
 import { getPublicProjects, type ProjectItem } from '@/lib/api/projects';
@@ -46,7 +47,7 @@ export default function ProjectsPage() {
           </div>
         </div>
 
-        {loading ? <p className="text-sm text-slate-600">Loading projects...</p> : null}
+        {loading ? <Spinner size="md" label="Loading projects…" /> : null}
         {errorMessage ? <p className="text-sm text-rose-400">{errorMessage}</p> : null}
 
         <div className="space-y-3 hd-fade-in">

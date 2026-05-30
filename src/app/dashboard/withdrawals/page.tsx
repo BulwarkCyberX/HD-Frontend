@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { createWithdrawalRequest, listMyWithdrawals, type WithdrawalRow } from '@/lib/api/withdrawals';
@@ -59,7 +60,7 @@ export default function WithdrawalsPage() {
       <p className="text-sm text-slate-600">
         Available balance is debited when an admin approves your request (ledger-only payouts).
       </p>
-      {loading ? <p className="text-sm text-slate-600">Loading...</p> : null}
+      {loading ? <Spinner size="md" label="Loading…" /> : null}
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       {info ? <p className="text-sm text-emerald-700">{info}</p> : null}
 

@@ -1,10 +1,11 @@
 import { apiJson } from './client';
 
-export type MailProvider = 'AUTO' | 'SMTP' | 'SENDGRID' | 'NONE';
+export type MailProvider = 'AUTO' | 'SMTP' | 'SENDGRID' | 'AWS_SES' | 'POSTMARK' | 'NONE';
 export type SessionPolicy = 'MULTI_DEVICE' | 'SINGLE_DEVICE';
 
 export type PlatformSettings = {
   mailProvider: MailProvider;
+  primaryMailProvider: MailProvider;
   mailFromAddress: string;
   mailFromName: string;
   mailReplyTo: string;
@@ -13,6 +14,10 @@ export type PlatformSettings = {
   smtpUser: string;
   smtpPassword: string;
   sendgridApiKey: string;
+  awsSesAccessKeyId: string;
+  awsSesSecretKey: string;
+  awsSesRegion: string;
+  postmarkServerToken: string;
   accessTokenExpiryMinutes: number;
   refreshTokenExpiryDays: number;
   emailVerificationCodeValue: number;

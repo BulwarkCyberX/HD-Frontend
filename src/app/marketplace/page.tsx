@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import {
   fetchFeaturedProviders,
@@ -189,7 +190,7 @@ export default function MarketplacePage() {
         <h2 className="text-lg font-semibold text-tropical-aqua-300">
           {tab === 'projects' ? 'Open projects' : 'Matching providers'}
         </h2>
-        {loading ? <p className="mt-2 text-sm text-neutral-400">Loading…</p> : null}
+        {loading ? <Spinner size="md" label="Loading…" /> : null}
         {tab === 'projects' ? (
           <div className="mt-4 space-y-3">
             {projects.map((project) => (

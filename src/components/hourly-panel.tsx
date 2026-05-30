@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Input } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import {
   approveTimeEntry,
   billTimeEntry,
@@ -116,7 +117,7 @@ export function HourlyPanel({
   };
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading hourly engagement…</p>;
+    return <Spinner size="md" label="Loading hourly engagement…" />;
   }
 
   return (

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useMemo, useState } from 'react';
+import { Spinner } from '@/components/spinner';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -115,7 +116,7 @@ function AuthResetPasswordFormInner() {
 
 export function AuthResetPasswordForm() {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-400">Loading…</p>}>
+    <Suspense fallback={<Spinner size="md" label="Loading…" />}>
       <AuthResetPasswordFormInner />
     </Suspense>
   );

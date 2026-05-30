@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Badge, Button, Card, Textarea } from '@hackersdeal/ui';
 import { FileAttachmentControl } from '@/components/file-attachment-control';
+import { Spinner } from '@/components/spinner';
 import { StarRating } from '@/components/star-rating';
 import { useAuth } from '@/hooks/auth-context';
 import { aiReviewReport } from '@/lib/api/ai';
@@ -576,7 +577,7 @@ export default function ProjectWorkspacePage() {
 
   return (
     <div className="space-y-4">
-      {loading ? <p className="text-sm text-slate-600">Loading workspace...</p> : null}
+      {loading ? <Spinner size="md" label="Loading workspace…" /> : null}
       {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
       {actionMessage ? <p className="text-sm text-emerald-700">{actionMessage}</p> : null}
 

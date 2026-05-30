@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, Input } from '@hackersdeal/ui';
 import { ProtectedRoute } from '@/components/protected-route';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import {
   addOrganizationMember,
@@ -83,7 +84,7 @@ function OrgDetailContent() {
     }
   };
 
-  if (!org) return <p className="text-sm text-slate-600">Loading…</p>;
+  if (!org) return <Spinner size="md" label="Loading…" />;
 
   const myRole = org.members.find((m) => m.user.id === user?.id)?.role;
   const canManageSso = myRole === 'OWNER';

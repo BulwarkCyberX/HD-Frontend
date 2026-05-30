@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
 import { FileAttachmentControl } from '@/components/file-attachment-control';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import {
@@ -89,7 +90,7 @@ export default function BountyProgramPage() {
   };
 
   if (!program && !error) {
-    return <p className="text-sm text-slate-500">Loading…</p>;
+    return <Spinner size="md" label="Loading…" />;
   }
 
   if (error && !program) {

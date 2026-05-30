@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Badge, Card } from '@hackersdeal/ui';
 import { useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/protected-route';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { getMyBids, type BidItem } from '@/lib/api/bids';
@@ -49,7 +50,7 @@ export default function MyBidsPage() {
         {user?.role !== 'PROVIDER' ? (
           <p className="text-sm text-rose-600">Only provider accounts can access this page.</p>
         ) : null}
-        {loading ? <p className="text-sm text-slate-600">Loading bids...</p> : null}
+        {loading ? <Spinner size="md" label="Loading bids…" /> : null}
         {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
         <div className="space-y-3">
           {bids.map((bid) => (

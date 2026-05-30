@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, Textarea } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { getReportStatusTone } from '@/lib/reports/status';
@@ -102,7 +103,7 @@ export default function AdminReportsTriagePage() {
         <p className="text-sm text-slate-600">Review provider submissions and set final triage status.</p>
       </div>
 
-      {loading ? <p className="text-sm text-slate-600">Loading reports...</p> : null}
+      {loading ? <Spinner size="md" label="Loading reports…" /> : null}
       {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
       {actionMessage ? <p className="text-sm text-emerald-700">{actionMessage}</p> : null}
 

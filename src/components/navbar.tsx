@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { NavUserMenu } from '@/components/nav-user-menu';
 import { NotificationBell } from '@/components/notification-bell';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 
 export function Navbar() {
@@ -43,7 +44,9 @@ export function Navbar() {
           {isAuthenticated ? <NotificationBell /> : null}
 
           {isLoading ? (
-            <div className="ml-1 h-8 w-24 animate-pulse rounded-md bg-neutral-900" aria-label="Loading session" />
+            <div className="ml-1 flex items-center">
+              <Spinner size="sm" className="border-tropical-aqua-400 border-t-transparent" />
+            </div>
           ) : isAuthenticated ? (
             <NavUserMenu />
           ) : null}

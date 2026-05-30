@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Badge, Button, Card } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError, getProviderProfile, type AuthUser } from '@/lib/api/auth';
 import { getBidsForProject, type BidItem, updateBidStatus } from '@/lib/api/bids';
@@ -67,7 +68,7 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-1 py-2 sm:px-2 sm:py-4">
-      {loading ? <p className="text-sm text-slate-600">Loading project...</p> : null}
+      {loading ? <Spinner size="md" label="Loading project…" /> : null}
       {errorMessage ? <p className="mb-4 text-sm text-rose-400">{errorMessage}</p> : null}
 
       {project ? (

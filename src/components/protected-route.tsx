@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/auth-context';
+import { Spinner } from '@/components/spinner';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,11 +18,19 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, isLoading, pathname, router]);
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-slate-600">Checking session...</div>;
+    return (
+      <div className="flex items-center gap-2 p-6">
+        <Spinner size="sm" label="Checking session…" />
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <div className="p-6 text-sm text-slate-600">Redirecting to login...</div>;
+    return (
+      <div className="flex items-center gap-2 p-6">
+        <Spinner size="sm" label="Redirecting to login…" />
+      </div>
+    );
   }
 
   return <>{children}</>;

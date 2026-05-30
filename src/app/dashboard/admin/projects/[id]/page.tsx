@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, Input, Textarea, Badge } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import {
   acceptBidAsAdmin,
@@ -96,7 +97,7 @@ export default function AdminProjectDetailPage() {
     }
   };
 
-  if (!project) return <p className="text-sm text-slate-600">Loading…</p>;
+  if (!project) return <Spinner size="md" label="Loading…" />;
 
   return (
     <section className="space-y-4">

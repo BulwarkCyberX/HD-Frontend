@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import { ApiError } from '@/lib/api/auth';
 import { uploadVdpAttachmentPublic } from '@/lib/api/files';
@@ -61,7 +62,7 @@ export default function PublicVdpPage() {
   if (!vdp) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-neutral-400">Loading…</p>
+        <Spinner size="lg" label="Loading…" />
       </main>
     );
   }

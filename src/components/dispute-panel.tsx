@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import {
   addDisputeComment,
   addDisputeEvidence,
@@ -192,7 +193,7 @@ export function DisputePanel({ token, projectId, isAdmin }: Props) {
           ) : null}
         </div>
       ) : (
-        <p className="text-sm text-slate-500">Loading dispute…</p>
+        <Spinner size="md" label="Loading dispute…" />
       )}
     </Card>
   );

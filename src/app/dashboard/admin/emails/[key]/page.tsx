@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button, Card, Input, Textarea } from '@hackersdeal/ui';
+import { Spinner } from '@/components/spinner';
 import { useAuth } from '@/hooks/auth-context';
 import {
   getEmailTemplate,
@@ -56,7 +57,7 @@ export default function AdminEmailEditorPage() {
   };
 
   if (!tpl) {
-    return <p className="text-sm text-slate-600">Loading template…</p>;
+    return <Spinner size="md" label="Loading template…" />;
   }
 
   return (
